@@ -27,6 +27,12 @@ public class SimpleShopTrader implements ShopTrader, Keyed {
         return profession;
     }
 
+    @Override
+    public void setTrades(@NotNull List<TraderTrade> trades) {
+        this.trades.clear();
+        this.trades.addAll(trades);
+    }
+
     @NotNull
     @Override
     public List<TraderTrade> getTrades(@NotNull Entity viewer) {

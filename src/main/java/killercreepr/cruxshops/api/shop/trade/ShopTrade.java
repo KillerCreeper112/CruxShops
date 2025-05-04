@@ -1,7 +1,9 @@
 package killercreepr.cruxshops.api.shop.trade;
 
 import org.bukkit.entity.Entity;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -9,6 +11,17 @@ public interface ShopTrade {
     @NotNull
     List<ShopTradeIngredient> getIngredients();
     @NotNull List<ShopTradeResult> getResults();
+
+    @Contract(pure = true)
+    ShopTrade withIngredients(@NotNull List<ShopTradeIngredient> ingredients);
+    @Contract(pure = true)
+    ShopTrade withResults(@NotNull List<ShopTradeResult> results);
+
+    /**
+     * @return If the original trade was modified,
+     * this will return the trade before it was modified.
+     */
+    @Nullable ShopTrade getOriginalTrade();
 
     /**
      * @return Whether the player can afford all the ingredients.
