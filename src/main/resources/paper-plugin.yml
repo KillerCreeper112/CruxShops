@@ -1,0 +1,21 @@
+name: CruxShops
+version: '1.0'
+author: killercreepr
+main: killercreepr.cruxshops.core.CruxShops
+api-version: '1.19'
+dependencies:
+  server:
+    CruxCore:
+      load: BEFORE
+      required: true # Defaults to true
+      join-classpath: true # Defaults to true
+    zAuctionHouseV3:
+      load: BEFORE
+      required: false
+    CruxCurrency:
+      load: BEFORE
+      join-classpath: true # Defaults to true
+    CruxSummoning:
+      required: false
+    CruxRewards:
+      required: false
