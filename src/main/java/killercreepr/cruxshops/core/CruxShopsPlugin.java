@@ -11,15 +11,16 @@ import killercreepr.crux.core.registries.CruxRegistries;
 import killercreepr.cruxconfig.config.bukkit.file.CruxFolder;
 import killercreepr.cruxconfig.config.bukkit.standard.SimpleLangConfig;
 import killercreepr.cruxcore.CruxCore;
+import killercreepr.cruxshops.core.command.CruxShopCommands;
 import killercreepr.cruxshops.core.config.CfgHook;
 import killercreepr.cruxshops.core.config.Config;
 import killercreepr.cruxshops.core.lang.Lang;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 
-public class CruxShops extends CruxPlugin implements Listener, LangProvider {
-    private static CruxShops instance;
-    public static CruxShops inst(){ return instance; }
+public class CruxShopsPlugin extends CruxPlugin implements Listener, LangProvider {
+    private static CruxShopsPlugin instance;
+    public static CruxShopsPlugin inst(){ return instance; }
 
     protected Config values;
 
@@ -44,6 +45,8 @@ public class CruxShops extends CruxPlugin implements Listener, LangProvider {
         instance = this;
         super.onLoad();
         CfgHook.load();
+
+        new CruxShopCommands(this).register();
     }
 
     @Override
@@ -78,6 +81,8 @@ public class CruxShops extends CruxPlugin implements Listener, LangProvider {
         super.reload();
         values.reload();
         langProvider.reload(this);
+
+        CfgHook.reload(this);
 
         CruxCore.inst().cruxMenus().menuRegistry().loadConfiguration(
             new CruxFolder(this, "menus").file()

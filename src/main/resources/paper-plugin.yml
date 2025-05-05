@@ -1,7 +1,7 @@
 name: CruxShops
 version: '1.0'
 author: killercreepr
-main: killercreepr.cruxshops.core.CruxShops
+main: killercreepr.cruxshops.core.CruxShopsPlugin
 api-version: '1.19'
 dependencies:
   server:

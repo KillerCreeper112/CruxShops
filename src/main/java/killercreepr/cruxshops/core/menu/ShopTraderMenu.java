@@ -232,6 +232,11 @@ public class ShopTraderMenu extends ConfigMenu {
         int startIndex = getStartingInvSlotFromTradeIndex(index);
         buildTradeItems(trade).forEach((tradeIndexSlot, action) ->{
             int invSlot = startIndex + tradeIndexSlot;
+            if(action == null){
+                setItem(invSlot, null);
+                getSlots().remove(invSlot);
+                return;
+            }
             setItem(invSlot, action.getFirst().item(), new SimpleFixedSlot(this, invSlot){
                 @Override
                 public void onClick(@NotNull HumanEntity p, @NotNull InventoryClickEvent event) {

@@ -1,9 +1,10 @@
 package killercreepr.cruxshops.core.shop;
 
+import killercreepr.crux.api.loot.LootContext;
+import killercreepr.crux.api.loot.conditions.LootCondition;
 import killercreepr.cruxshops.api.shop.trade.ShopTrade;
 import killercreepr.cruxshops.api.shop.trade.ShopTradeIngredient;
 import killercreepr.cruxshops.api.shop.trade.ShopTradeResult;
-import killercreepr.cruxshops.api.shop.trade.TradeViewCondition;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,10 +15,10 @@ import java.util.List;
 public class SimpleShopTrade implements ShopTrade {
     protected final @NotNull List<ShopTradeIngredient> ingredients;
     protected final @NotNull List<ShopTradeResult> results;
-    protected final @Nullable TradeViewCondition viewCondition;
+    protected final @Nullable LootCondition viewCondition;
     protected final @Nullable ShopTrade originalTrade;
 
-    public SimpleShopTrade(@NotNull List<ShopTradeIngredient> ingredients, @NotNull List<ShopTradeResult> results, @Nullable TradeViewCondition viewCondition, @Nullable ShopTrade originalTrade) {
+    public SimpleShopTrade(@NotNull List<ShopTradeIngredient> ingredients, @NotNull List<ShopTradeResult> results, @Nullable LootCondition viewCondition, @Nullable ShopTrade originalTrade) {
         this.ingredients = ingredients;
         this.results = results;
         this.viewCondition = viewCondition;
@@ -92,7 +93,9 @@ public class SimpleShopTrade implements ShopTrade {
      */
     @Override
     public boolean canView(@NotNull Entity p) {
-        return viewCondition == null || viewCondition.canView(p);
+        if(viewCondition == null) return true;
+        LootContext ctx = LootContext.builder().looter(p).looted(this).build();
+        return viewCondition.test(ctx);
     }
 
     /**

@@ -6,16 +6,15 @@ import killercreepr.crux.core.registry.SimpleMappedRegistry;
 import killercreepr.cruxconfig.config.common.FileContext;
 import killercreepr.cruxconfig.config.common.element.FileElement;
 import killercreepr.cruxconfig.config.common.element.FileObject;
-import killercreepr.cruxconfig.config.common.handler.FileObjectHandler;
-import killercreepr.cruxshops.api.shop.trade.ShopTrade;
+import killercreepr.cruxshops.api.config.handler.FileObjectHandlerKeyed;
 import killercreepr.cruxshops.api.trader.ShopTrader;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class FileShopTrader implements FileObjectHandler<ShopTrader> {
-    protected final MappedRegistry<Key, FileObjectHandler<? extends ShopTrader>> types = new SimpleMappedRegistry<>();
-    public void registerType(Key key, FileObjectHandler<? extends ShopTrader> type){
+public class FileShopTrader implements FileObjectHandlerKeyed<ShopTrader> {
+    protected final MappedRegistry<Key, FileObjectHandlerKeyed<? extends ShopTrader>> types = new SimpleMappedRegistry<>();
+    public void registerType(Key key, FileObjectHandlerKeyed<? extends ShopTrader> type){
         types.register(key, type);
     }
 
@@ -26,7 +25,7 @@ public class FileShopTrader implements FileObjectHandler<ShopTrader> {
 
     @Nullable
     @Override
-    public ShopTrader deserializeFromFile(@NotNull FileContext<?> ctx, @NotNull FileElement e) {
+    public ShopTrader deserializeFromFile(@NotNull FileContext<?> ctx, @NotNull FileElement e, @NotNull Key key) {
         var reg = ctx.getRegistry();
         if(!(e instanceof FileObject o)) return null;
         Key typeKey = reg.deserializeFromFile(Key.class, o.get("type"));
@@ -36,6 +35,16 @@ public class FileShopTrader implements FileObjectHandler<ShopTrader> {
             Crux.logError("ShopTrader " + typeKey + " not found!");
             return null;
         }
-        return handler.deserializeFromFile(ctx, e);
+        return handler.deserializeFromFile(ctx, e, key);
+    }
+
+    @Nullable
+    @Override
+    public ShopTrader deserializeFromFile(@NotNull FileContext<?> ctx, @NotNull FileElement e) {
+        var reg = ctx.getRegistry();
+        if(!(e instanceof FileObject o)) return null;
+        Key key = reg.deserializeFromFile(Key.class, o.get("key"));
+        if(key == null) return null;
+        return deserializeFromFile(ctx, e, key);
     }
 }

@@ -36,6 +36,7 @@ public class SimpleShopTrader implements ShopTrader, Keyed {
     @NotNull
     @Override
     public List<TraderTrade> getTrades(@NotNull Entity viewer) {
+        if(trades.isEmpty()) setTrades(profession.getAllTrades());
         return trades;
     }
 

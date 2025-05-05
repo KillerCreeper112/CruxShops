@@ -7,32 +7,32 @@ import killercreepr.cruxconfig.config.common.FileContext;
 import killercreepr.cruxconfig.config.common.element.FileElement;
 import killercreepr.cruxconfig.config.common.element.FileObject;
 import killercreepr.cruxconfig.config.common.handler.FileObjectHandler;
-import killercreepr.cruxshops.api.shop.trade.ShopTrade;
+import killercreepr.cruxshops.api.profession.TraderProfession;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class FileShopTrade implements FileObjectHandler<ShopTrade> {
-    protected final MappedRegistry<Key, FileObjectHandler<? extends ShopTrade>> types = new SimpleMappedRegistry<>();
-    public void registerType(Key key, FileObjectHandler<? extends ShopTrade> type){
+public class FileTraderProfession implements FileObjectHandler<TraderProfession> {
+    protected final MappedRegistry<Key, FileObjectHandler<? extends TraderProfession>> types = new SimpleMappedRegistry<>();
+    public void registerType(Key key, FileObjectHandler<? extends TraderProfession> type){
         types.register(key, type);
     }
 
     @Override
-    public @NotNull FileElement serializeToFile(@NotNull FileContext<?> ctx, @NotNull ShopTrade result) {
+    public @NotNull FileElement serializeToFile(@NotNull FileContext<?> ctx, @NotNull TraderProfession result) {
         return null;
     }
 
     @Nullable
     @Override
-    public ShopTrade deserializeFromFile(@NotNull FileContext<?> ctx, @NotNull FileElement e) {
+    public TraderProfession deserializeFromFile(@NotNull FileContext<?> ctx, @NotNull FileElement e) {
         var reg = ctx.getRegistry();
         if(!(e instanceof FileObject o)) return null;
         Key typeKey = reg.deserializeFromFile(Key.class, o.get("type"));
         if(typeKey == null) typeKey = Crux.key("simple");
         var handler = types.get(typeKey);
         if(handler == null){
-            Crux.logError("ShopTrade " + typeKey + " not found!");
+            Crux.logError("TraderProfession " + typeKey + " not found!");
             return null;
         }
         return handler.deserializeFromFile(ctx, e);

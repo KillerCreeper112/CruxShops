@@ -23,6 +23,6 @@ public class CruxCurrencyTradeIngredient extends CruxCurrencyTradeObject impleme
     @Override
     public void accept(@NotNull Entity p) {
         if(!(p instanceof OfflinePlayer player)) return;
-        CruxCurrencyPlugin.inst().ecoHandler().depositBalance(player, currencyHolder.value(), amount);
+        CruxCurrencyPlugin.inst().ecoHandler().withdrawBalance(player, currencyHolder.value(), amount);
     }
 }
