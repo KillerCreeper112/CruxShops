@@ -7,6 +7,7 @@ import killercreepr.crux.api.text.tags.TagParser;
 import killercreepr.crux.api.text.tags.container.TagContainer;
 import killercreepr.crux.core.text.resolver.Tag;
 import killercreepr.crux.core.util.CruxMath;
+import killercreepr.cruxshops.api.data.OriginalHolder;
 import killercreepr.cruxshops.api.shop.trade.ShopTrade;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,6 +34,14 @@ public class ShopTradeTags implements ObjectTag<ShopTrade> {
             .add(Tag.string("ingredient_amount", (args, ctx) ->{
                 int index = (int) CruxMath.evaluate(ctx.deserializeString(args.getOrDefault(0, "0")));
                 return object.getIngredients().get(index).getAmount() + "";
+            }))
+            .add(Tag.string("result_amount_original", (args, ctx) ->{
+                int index = (int) CruxMath.evaluate(ctx.deserializeString(args.getOrDefault(0, "0")));
+                return OriginalHolder.getCompleteOriginalOrThis(object.getResults().get(index)).getAmount() + "";
+            }))
+            .add(Tag.string("ingredient_amount_original", (args, ctx) ->{
+                int index = (int) CruxMath.evaluate(ctx.deserializeString(args.getOrDefault(0, "0")));
+                return OriginalHolder.getCompleteOriginalOrThis(object.getIngredients().get(index)).getAmount() + "";
             }))
             ;
     }

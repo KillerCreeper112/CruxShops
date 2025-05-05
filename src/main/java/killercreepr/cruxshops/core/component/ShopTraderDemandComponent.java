@@ -1,5 +1,6 @@
 package killercreepr.cruxshops.core.component;
 
+import killercreepr.crux.api.text.tags.container.MergedTagContainer;
 import killercreepr.cruxshops.api.component.ShopTraderComponent;
 import killercreepr.cruxshops.api.shop.trade.ShopTrade;
 import killercreepr.cruxshops.api.shop.trade.ShopTradeObject;
