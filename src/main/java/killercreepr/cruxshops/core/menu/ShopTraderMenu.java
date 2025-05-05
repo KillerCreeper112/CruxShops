@@ -71,6 +71,7 @@ public class ShopTraderMenu extends ConfigMenu {
     @Override
     public void load() {
         var viewer = info().getOrThrow("viewer", Entity.class);
+        trades.clear();
         trades.addAll(trader.getTrades(viewer));
 
         super.load();
@@ -95,7 +96,8 @@ public class ShopTraderMenu extends ConfigMenu {
                 page = newPage;
                 clearItems(true);
                 clearMenuItems(true);
-                refresh();
+                load();
+                open(p);
                 CreateSound.sound(Sound.UI_BUTTON_CLICK).playFor(p);
             }
             @Override
@@ -127,7 +129,8 @@ public class ShopTraderMenu extends ConfigMenu {
                 page = newPage;
                 clearItems(true);
                 clearMenuItems(true);
-                refresh();
+                load();
+                open(p);
                 CreateSound.sound(Sound.UI_BUTTON_CLICK).playFor(p);
             }
 
@@ -278,7 +281,8 @@ public class ShopTraderMenu extends ConfigMenu {
             if(trader.purchaseTrade(p, traderTrade, t)){
                 clearItems(true);
                 clearMenuItems(true);
-                refresh();
+                load();
+                open(p);
             }
             p.sendMessage("purchase");
         };
@@ -297,7 +301,7 @@ public class ShopTraderMenu extends ConfigMenu {
         if(buying == null) map.put(0, null);
         else{
             mainTrade = buying;
-            icon = buildResultIcon((mainTrade));
+            icon = mainTrade.getResults().getFirst().buildIcon();
             ShopTradeIngredient ingredient = buying.getIngredients().getFirst();
             map.put(0, new Pair<>(applyBuyingItem(applyItem(icon, ingredient.buildIcon()), buying, trade), buildBuyingClick(trade)));
         }
@@ -307,7 +311,7 @@ public class ShopTraderMenu extends ConfigMenu {
         else{
             if(mainTrade == null){
                 mainTrade = selling;
-                icon = buildResultIcon((mainTrade));
+                icon = mainTrade.getIngredients().getFirst().buildIcon();
             }
             ShopTradeResult result = selling.getResults().getFirst();
             map.put(2, new Pair<>(applySellingItem(applyItem(icon, result.buildIcon()), selling, trade), buildSellingClick(trade)));
@@ -331,10 +335,6 @@ public class ShopTraderMenu extends ConfigMenu {
         });
         icon.setAmount(ingredient.getAmount());
         return CruxItem.wrap(icon);
-    }
-
-    public ItemStack buildResultIcon(ShopTrade trade){
-        return trade.getResults().getFirst().buildIcon();
     }
 
     public int getStartingInvSlotFromTradeIndex(int index){
