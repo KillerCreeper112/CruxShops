@@ -5,6 +5,7 @@ import killercreepr.crux.api.component.TypedDataComponent;
 import killercreepr.cruxshops.api.component.TraderTradeComponent;
 import killercreepr.cruxshops.api.shop.trade.ShopTrade;
 import killercreepr.cruxshops.api.shop.trade.TraderTrade;
+import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -31,6 +32,12 @@ public class SimpleTraderTrade extends DataComponentHandler.Simple implements Tr
     @Override
     public ShopTrade getSellingTrade() {
         return sellingTrade;
+    }
+
+    @Override
+    public boolean canView(Entity e) {
+        if((buyingTrade != null && !buyingTrade.canView(e)) || (sellingTrade != null && !sellingTrade.canView(e))) return false;
+        return true;
     }
 
     public Collection<TypedDataComponent<?>> buildCopiedTypedCollection() {

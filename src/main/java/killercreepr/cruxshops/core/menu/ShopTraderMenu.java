@@ -159,7 +159,10 @@ public class ShopTraderMenu extends ConfigMenu {
         return (p, event) ->{
             var t = holder.value();
             if(t == null) return;
-            if(!t.canView(p)){
+            if(trader.canPurchaseTrade(p, t) != ShopTrader.CanPurchase.TRUE){
+                return;
+            }
+            /*if(!t.canView(p)){
                 p.sendMessage("Can't view");
                 return;
             }
@@ -170,8 +173,11 @@ public class ShopTraderMenu extends ConfigMenu {
             if(!t.canAccept(p)){
                 p.sendMessage("Can't accept");
                 return;
+            }*/
+
+            if(trader.purchaseTrade(p, t)){
+
             }
-            t.purchase(p);
             p.sendMessage("purchase");
         };
     }

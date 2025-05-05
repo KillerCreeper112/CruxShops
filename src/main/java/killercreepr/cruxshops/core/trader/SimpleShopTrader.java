@@ -4,7 +4,9 @@ import killercreepr.crux.api.component.DataComponentHandler;
 import killercreepr.crux.api.component.TypedDataComponent;
 import killercreepr.crux.api.data.tick.TickedTime;
 import killercreepr.cruxshops.api.component.ShopTraderComponent;
+import killercreepr.cruxshops.api.event.EntityPurchaseTraderTradeEvent;
 import killercreepr.cruxshops.api.profession.TraderProfession;
+import killercreepr.cruxshops.api.shop.trade.ShopTrade;
 import killercreepr.cruxshops.api.shop.trade.TraderTrade;
 import killercreepr.cruxshops.api.trader.ShopTrader;
 import net.kyori.adventure.key.Key;
@@ -40,10 +42,42 @@ public class SimpleShopTrader extends DataComponentHandler.Simple implements Sho
         this.trades.addAll(trades);
     }
 
+    @Override
+    public boolean purchaseTrade(@NotNull Entity e, @NotNull ShopTrade trade) {
+        EntityPurchaseTraderTradeEvent event = new EntityPurchaseTraderTradeEvent(e, this, trade);
+        if(!event.callEvent()) return false;
+        trade = event.getTrade();
+
+        trade.purchase(e);
+        return true;
+    }
+
+    @Override
+    public @NotNull CanPurchase canPurchaseTrade(@NotNull Entity p, @NotNull ShopTrade trade) {
+        if(!trade.canAfford(p)) return CanPurchase.CANNOT_AFFORD;
+        if(!trade.canAccept(p)) return CanPurchase.CANNOT_ACCEPT;
+
+        //UUID uuid = p.getUniqueId();
+        /*if(trade instanceof BuyerLimitedTrade limited){
+            if(limited.getUses(uuid) < 1) return CanPurchase.NOT_ENOUGH_STOCK;
+            return CanPurchase.TRUE;
+        }*/
+
+        /*StockManager stockManager = shop.getStockManager();
+        if(stockManager.hasUnlimitedStock()) return CanPurchase.TRUE;
+
+        for(CruxTradeResult result : trade.getResults()){
+            if(stockManager.getStock(result) < result.getAmount(uuid)) return CanPurchase.NOT_ENOUGH_STOCK;
+        }*/
+        return CanPurchase.TRUE;
+    }
+
     @NotNull
     @Override
     public List<TraderTrade> getTrades(@NotNull Entity viewer) {
+        List<TraderTrade> trades = new ArrayList<>(this.trades);
         if(trades.isEmpty()) setTrades(profession.getAllTrades());
+        trades.removeIf(t -> !t.canView(viewer));
 
         if(!trades.isEmpty()){
             var data = getAllOfType(ShopTraderComponent.class);
@@ -65,7 +99,6 @@ public class SimpleShopTrader extends DataComponentHandler.Simple implements Sho
                 }
             }
         }
-
         return trades;
     }
 

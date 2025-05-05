@@ -1,12 +1,15 @@
 package killercreepr.cruxshops.api.shop.trade;
 
 import killercreepr.crux.api.component.DataComponentAccessor;
+import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 public interface TraderTrade extends DataComponentAccessor {
     @Nullable ShopTrade getBuyingTrade();
     @Nullable ShopTrade getSellingTrade();
+
+    boolean canView(Entity e);
 
     @Contract(pure = true)
     TraderTrade withBuyingTrade(@Nullable ShopTrade buyingTrade);
