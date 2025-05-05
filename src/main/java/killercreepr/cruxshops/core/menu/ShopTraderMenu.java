@@ -144,7 +144,7 @@ public class ShopTraderMenu extends ConfigMenu {
     }
 
     public boolean canUse(ShopTrade trade, Entity e){
-        return trade != null && trade.canAfford(e) && trade.canAccept(e);
+        return trade != null && trader.canPurchaseTrade(e, trade) == ShopTrader.CanPurchase.TRUE;
     }
 
     public @NotNull String buildTradeSlotsTitle(){
@@ -213,6 +213,10 @@ public class ShopTraderMenu extends ConfigMenu {
         MergedTagContainer tags = trader.buildTags(trade);
         if(tags == null) tags = TagContainer.merged();
         tags.hook(trade).hook(traderTrade);
+        tags.add(Tag.string("can_use_trade", (args, ctx) ->{
+            var entity = info().getOrThrow("viewer", Entity.class);
+            return canUse(trade, entity) + "";
+        }));
         return displayItem.applyComponents(item, TextParserContext.builder().tags(tags).build());
     }
 
@@ -223,6 +227,10 @@ public class ShopTraderMenu extends ConfigMenu {
         MergedTagContainer tags = trader.buildTags(trade);
         if(tags == null) tags = TagContainer.merged();
         tags.hook(trade).hook(traderTrade);
+        tags.add(Tag.string("can_use_trade", (args, ctx) ->{
+            var entity = info().getOrThrow("viewer", Entity.class);
+            return canUse(trade, entity) + "";
+        }));
         return displayItem.applyComponents(item, TextParserContext.builder().tags(tags).build());
     }
 
@@ -233,6 +241,10 @@ public class ShopTraderMenu extends ConfigMenu {
         MergedTagContainer tags = trader.buildTags(trade);
         if(tags == null) tags = TagContainer.merged();
         tags.hook(trade).hook(traderTrade);
+        tags.add(Tag.string("can_use_trade", (args, ctx) ->{
+            var entity = info().getOrThrow("viewer", Entity.class);
+            return canUse(trade, entity) + "";
+        }));
         return displayItem.applyComponents(item, TextParserContext.builder().tags(tags).build());
     }
 

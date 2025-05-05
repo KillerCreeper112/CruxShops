@@ -184,6 +184,46 @@ public class CfgHook {
                 return null;
             }
         });
+        TRADER_TRADE.registerType(Crux.key("generic_flip"), new FileObjectHandler<>() {
+            @Nullable
+            @Override
+            public TraderTrade deserializeFromFile(@NotNull FileContext<?> ctx, @NotNull FileElement e) {
+                if(!(e instanceof FileObject o)) return null;
+                var reg = ctx.getRegistry();
+                String itemType = reg.deserializeFromFile(String.class, o.get("result"));
+                if(itemType == null) return null;
+                int sell = reg.deserializeFromFile(Integer.class, o.get("sell"));
+                int buy = reg.deserializeFromFile(Integer.class, o.get("buy"));
+                Key currency = reg.deserializeFromFile(Key.class, o.get("currency"));
+                if(currency == null) currency = Crux.key("orbit");
+
+                String[] args = itemType.split(" ");
+                Key finalCurrency = currency;
+                ShopTrade buying = new SimpleShopTrade(
+                    List.of(new CruxCurrencyTradeIngredient(() -> CruxCurrencyRegistries.CURRENCY.get(finalCurrency), buy, null)),
+                    List.of(new PluginItemTradeResult(Crux.handlers().item().getItem(Crux.key(args[0])),
+                        args.length < 2 ? 1 : Integer.parseInt(args[1]), null)),
+                    null, null
+                );
+
+                ShopTrade selling = new SimpleShopTrade(
+                    List.of(new PluginItemTradeIngredient(Crux.handlers().item().getItem(Crux.key(args[0])),
+                        args.length < 3 ? (args.length < 2 ? 1 : Integer.parseInt(args[1])) : Integer.parseInt(args[2]), null)),
+                    List.of(new CruxCurrencyTradeResult(() -> CruxCurrencyRegistries.CURRENCY.get(finalCurrency), sell, null)),
+                    null, null
+                );
+
+                Collection<TypedDataComponent<?>> components = null;
+                String componentText = reg.deserializeFromFile(String.class, o.get("components"));
+                if(componentText != null) components = DataComponentDecoder.componentDecoder().parseComponents(componentText);
+                return new SimpleTraderTrade(buying, selling, components);
+            }
+
+            @Override
+            public @NotNull FileElement serializeToFile(@NotNull FileContext<?> ctx, @NotNull TraderTrade trade) {
+                return null;
+            }
+        });
     }
 
     public static void registerShopTradeTypes(){
