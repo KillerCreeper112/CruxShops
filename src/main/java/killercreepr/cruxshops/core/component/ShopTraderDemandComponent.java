@@ -1,6 +1,5 @@
 package killercreepr.cruxshops.core.component;
 
-import killercreepr.crux.api.valueproviders.number.NumberProvider;
 import killercreepr.cruxshops.api.component.ShopTraderComponent;
 import killercreepr.cruxshops.api.shop.trade.ShopTrade;
 import killercreepr.cruxshops.api.shop.trade.ShopTradeObject;
@@ -17,6 +16,16 @@ public class ShopTraderDemandComponent implements ShopTraderComponent {
     public ShopTraderDemandComponent(@Nullable TradeModifier buyingModifier, @Nullable TradeModifier sellingModifier) {
         this.buyingModifier = buyingModifier;
         this.sellingModifier = sellingModifier;
+    }
+
+    @Nullable
+    public TradeModifier getBuyingModifier() {
+        return buyingModifier;
+    }
+
+    @Nullable
+    public TradeModifier getSellingModifier() {
+        return sellingModifier;
     }
 
     @Nullable

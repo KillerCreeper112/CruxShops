@@ -10,10 +10,11 @@ import java.util.function.UnaryOperator;
 public class CruxShopsComponents {
     public static void register(){}
     public static final DataComponentType<ShopTraderDemandComponent> SHOP_TRADER_DEMAND = register("shop_trader/demand", builder ->
-        builder.textParser(PersistTextParser.mapBuilder(ShopTraderDemandComponent.class).build()));
+        builder.textParser(CruxShopCompParsers.SHOP_TRADER_DEMAND));
 
     public static final DataComponentType<TraderTradeDemandComponent> TRADER_TRADE_DEMAND = register("trader_trade/demand", builder ->
-        builder.textParser(PersistTextParser.mapBuilder(TraderTradeDemandComponent.class).build()));
+        builder.textParser(PersistTextParser.mapBuilder(TraderTradeDemandComponent.class)
+            .apply(ctx -> new TraderTradeDemandComponent())));
 
     private static <T> DataComponentType<T> register(String id, UnaryOperator<DataComponentType.Builder<T>> builderOperator){
         return CruxRegistries.DATA_COMPONENT_TYPE.register(Crux.key(id), builderOperator.apply(DataComponentType.builder()).build());
