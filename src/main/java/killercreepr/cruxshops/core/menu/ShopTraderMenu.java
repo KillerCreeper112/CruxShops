@@ -246,7 +246,7 @@ public class ShopTraderMenu extends ConfigMenu {
     }
 
     public BiConsumer<HumanEntity, InventoryClickEvent> buildBuyingClick(TraderTrade trade){
-        return purchaseTradeConsumer(trade::getBuyingTrade);
+        return purchaseTradeConsumer(trade::getBuyingTrade, trade);
     }
 
     public BiConsumer<HumanEntity, InventoryClickEvent> buildResultClick(TraderTrade trade){
@@ -255,7 +255,7 @@ public class ShopTraderMenu extends ConfigMenu {
         };
     }
 
-    public BiConsumer<HumanEntity, InventoryClickEvent> purchaseTradeConsumer(Holder<ShopTrade> holder){
+    public BiConsumer<HumanEntity, InventoryClickEvent> purchaseTradeConsumer(Holder<ShopTrade> holder, TraderTrade traderTrade){
         return (p, event) ->{
             var t = holder.value();
             if(t == null) return;
@@ -275,15 +275,17 @@ public class ShopTraderMenu extends ConfigMenu {
                 return;
             }*/
 
-            if(trader.purchaseTrade(p, t)){
-
+            if(trader.purchaseTrade(p, traderTrade, t)){
+                clearItems(true);
+                clearMenuItems(true);
+                refresh();
             }
             p.sendMessage("purchase");
         };
     }
 
     public BiConsumer<HumanEntity, InventoryClickEvent> buildSellingClick(TraderTrade trade){
-        return purchaseTradeConsumer(trade::getSellingTrade);
+        return purchaseTradeConsumer(trade::getSellingTrade, trade);
     }
 
     public Map<Integer, Pair<CruxItem, BiConsumer<HumanEntity, InventoryClickEvent>>> buildTradeItems(TraderTrade trade){

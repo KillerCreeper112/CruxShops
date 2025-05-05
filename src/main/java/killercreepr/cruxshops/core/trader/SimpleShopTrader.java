@@ -52,14 +52,14 @@ public class SimpleShopTrader extends DataComponentHandler.Simple implements Sho
     }
 
     @Override
-    public boolean purchaseTrade(@NotNull Entity e, @NotNull ShopTrade trade) {
+    public boolean purchaseTrade(@NotNull Entity e, @NotNull TraderTrade traderTrade, @NotNull ShopTrade trade) {
         EntityPurchaseTraderTradeEvent event = new EntityPurchaseTraderTradeEvent(e, this, trade);
         if(!event.callEvent()) return false;
         trade = event.getTrade();
 
         ShopTrade finalTrade = trade;
         forEachAllOfType(ShopTraderComponent.class, data ->{
-            data.onTradePurchased(this, e, finalTrade);
+            data.onTradePurchased(this, e, traderTrade, finalTrade);
         });
 
         trade.purchase(e);

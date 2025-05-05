@@ -14,7 +14,7 @@ public interface ShopTrader extends TraderTradesHolder, DataComponentAccessor {
     @NotNull TraderProfession getProfession();
     void setTrades(@NotNull List<TraderTrade> trades);
 
-    boolean purchaseTrade(@NotNull Entity e, @NotNull ShopTrade trade);
+    boolean purchaseTrade(@NotNull Entity e, @NotNull TraderTrade traderTrade, @NotNull ShopTrade trade);
 
     @NotNull CanPurchase canPurchaseTrade(@NotNull Entity p, @NotNull ShopTrade trade);
 

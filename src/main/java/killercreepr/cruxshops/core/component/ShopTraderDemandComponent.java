@@ -1,12 +1,12 @@
 package killercreepr.cruxshops.core.component;
 
-import killercreepr.crux.api.text.tags.container.MergedTagContainer;
 import killercreepr.cruxshops.api.component.ShopTraderComponent;
 import killercreepr.cruxshops.api.shop.trade.ShopTrade;
 import killercreepr.cruxshops.api.shop.trade.ShopTradeObject;
 import killercreepr.cruxshops.api.shop.trade.TraderTrade;
 import killercreepr.cruxshops.api.trader.ShopTrader;
 import killercreepr.cruxshops.core.shop.trade.CruxCurrencyTradeObject;
+import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,6 +17,17 @@ public class ShopTraderDemandComponent implements ShopTraderComponent {
     public ShopTraderDemandComponent(@Nullable TradeModifier buyingModifier, @Nullable TradeModifier sellingModifier) {
         this.buyingModifier = buyingModifier;
         this.sellingModifier = sellingModifier;
+    }
+
+    @Override
+    public void onTradePurchased(@NotNull ShopTrader trader, @NotNull Entity e, @NotNull TraderTrade traderTrade, @NotNull ShopTrade trade) {
+        var data = traderTrade.get(CruxShopsComponents.TRADER_TRADE_DEMAND);
+        if(data == null) return;
+        if(trade.equals(traderTrade.getBuyingTrade())){
+            data.addSupply(1);
+        }else if(trade.equals(traderTrade.getSellingTrade())){
+            data.addDemand(1);
+        }else throw new UnsupportedOperationException("What the heck??");
     }
 
     @Nullable

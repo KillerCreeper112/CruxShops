@@ -43,6 +43,24 @@ public class ShopTradeTags implements ObjectTag<ShopTrade> {
                 int index = (int) CruxMath.evaluate(ctx.deserializeString(args.getOrDefault(0, "0")));
                 return OriginalHolder.getCompleteOriginalOrThis(object.getIngredients().get(index)).getAmount() + "";
             }))
+
+
+            .add(Tag.string("result_name", (args, ctx) ->{
+                int index = (int) CruxMath.evaluate(ctx.deserializeString(args.getOrDefault(0, "0")));
+                return object.getResults().get(index).getDisplayName() + "";
+            }))
+            .add(Tag.string("ingredient_name", (args, ctx) ->{
+                int index = (int) CruxMath.evaluate(ctx.deserializeString(args.getOrDefault(0, "0")));
+                return object.getIngredients().get(index).getDisplayName() + "";
+            }))
+            .add(Tag.string("result_name_original", (args, ctx) ->{
+                int index = (int) CruxMath.evaluate(ctx.deserializeString(args.getOrDefault(0, "0")));
+                return OriginalHolder.getCompleteOriginalOrThis(object.getResults().get(index)).getDisplayName() + "";
+            }))
+            .add(Tag.string("ingredient_name_original", (args, ctx) ->{
+                int index = (int) CruxMath.evaluate(ctx.deserializeString(args.getOrDefault(0, "0")));
+                return OriginalHolder.getCompleteOriginalOrThis(object.getIngredients().get(index)).getDisplayName() + "";
+            }))
             ;
     }
 }
