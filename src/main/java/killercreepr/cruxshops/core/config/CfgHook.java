@@ -1,6 +1,8 @@
 package killercreepr.cruxshops.core.config;
 
 import com.google.common.reflect.TypeToken;
+import killercreepr.crux.api.component.TypedDataComponent;
+import killercreepr.crux.api.component.parser.DataComponentDecoder;
 import killercreepr.crux.api.data.DataExchange;
 import killercreepr.crux.api.loot.conditions.LootCondition;
 import killercreepr.crux.api.text.tags.container.MergedTagContainer;
@@ -41,6 +43,7 @@ import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.List;
 
 public class CfgHook {
@@ -146,7 +149,10 @@ public class CfgHook {
 
                 TraderProfession profession = reg.deserializeFromFile(TraderProfession.class, o.get("profession"));
                 if(profession == null) return null;
-                return new SimpleShopTrader(key, profession);
+                Collection<TypedDataComponent<?>> components = null;
+                String componentText = reg.deserializeFromFile(String.class, o.get("components"));
+                if(componentText != null) components = DataComponentDecoder.componentDecoder().parseComponents(componentText);
+                return new SimpleShopTrader(key, profession, components);
             }
 
             @Override
@@ -167,7 +173,10 @@ public class CfgHook {
                 ShopTrade buying = reg.deserializeFromFile(ShopTrade.class, o.get("buying_trade"));
                 ShopTrade selling = reg.deserializeFromFile(ShopTrade.class, o.get("selling_trade"));
                 if(buying == null && selling == null) return null;
-                return new SimpleTraderTrade(buying, selling);
+                Collection<TypedDataComponent<?>> components = null;
+                String componentText = reg.deserializeFromFile(String.class, o.get("components"));
+                if(componentText != null) components = DataComponentDecoder.componentDecoder().parseComponents(componentText);
+                return new SimpleTraderTrade(buying, selling, components);
             }
 
             @Override
@@ -215,7 +224,7 @@ public class CfgHook {
                 ItemHolder holder = reg.deserializeFromFile(ItemHolder.class, o.get("item"));
                 Integer amount = reg.deserializeFromFile(Integer.class, o.get("amount"));
                 if(amount == null) amount = 1;
-                return new PluginItemTradeIngredient(holder, amount);
+                return new PluginItemTradeIngredient(holder, amount, null);
             }
         });
         SHOP_TRADE_INGREDIENT.registerType(Crux.key("crux_currency"), new FileObjectHandler<>() {
@@ -232,7 +241,7 @@ public class CfgHook {
                 Key key = reg.deserializeFromFile(Key.class, o.get("currency"));
                 Integer amount = reg.deserializeFromFile(Integer.class, o.get("amount"));
                 if(amount == null) amount = 1;
-                return new CruxCurrencyTradeIngredient(() -> CruxCurrencyRegistries.CURRENCY.get(key), amount);
+                return new CruxCurrencyTradeIngredient(() -> CruxCurrencyRegistries.CURRENCY.get(key), amount, null);
             }
         });
     }
@@ -252,7 +261,7 @@ public class CfgHook {
                 ItemHolder holder = reg.deserializeFromFile(ItemHolder.class, o.get("item"));
                 Integer amount = reg.deserializeFromFile(Integer.class, o.get("amount"));
                 if(amount == null) amount = 1;
-                return new PluginItemTradeResult(holder, amount);
+                return new PluginItemTradeResult(holder, amount, null);
             }
         });
         SHOP_TRADE_RESULT.registerType(Crux.key("crux_currency"), new FileObjectHandler<>() {
@@ -269,7 +278,7 @@ public class CfgHook {
                 Key key = reg.deserializeFromFile(Key.class, o.get("currency"));
                 Integer amount = reg.deserializeFromFile(Integer.class, o.get("amount"));
                 if(amount == null) amount = 1;
-                return new CruxCurrencyTradeResult(() -> CruxCurrencyRegistries.CURRENCY.get(key), amount);
+                return new CruxCurrencyTradeResult(() -> CruxCurrencyRegistries.CURRENCY.get(key), amount, null);
             }
         });
     }

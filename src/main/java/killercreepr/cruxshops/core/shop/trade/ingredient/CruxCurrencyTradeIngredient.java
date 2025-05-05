@@ -8,10 +8,17 @@ import killercreepr.cruxshops.core.shop.trade.CruxCurrencyTradeObject;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class CruxCurrencyTradeIngredient extends CruxCurrencyTradeObject implements ShopTradeIngredient {
-    public CruxCurrencyTradeIngredient(Holder<CruxCurrency> currencyHolder, int amount) {
-        super(currencyHolder, amount);
+    public CruxCurrencyTradeIngredient(Holder<CruxCurrency> currencyHolder, int amount, ShopTradeIngredient original) {
+        super(currencyHolder, amount, original);
+    }
+
+    @Nullable
+    @Override
+    public ShopTradeIngredient getOriginal() {
+        return (ShopTradeIngredient) super.getOriginal();
     }
 
     @Override
@@ -24,5 +31,10 @@ public class CruxCurrencyTradeIngredient extends CruxCurrencyTradeObject impleme
     public void accept(@NotNull Entity p) {
         if(!(p instanceof OfflinePlayer player)) return;
         CruxCurrencyPlugin.inst().ecoHandler().withdrawBalance(player, currencyHolder.value(), amount);
+    }
+
+    @Override
+    public ShopTradeIngredient withAmount(int amount) {
+        return new CruxCurrencyTradeIngredient(currencyHolder, amount, this);
     }
 }

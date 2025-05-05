@@ -9,14 +9,23 @@ import killercreepr.cruxitems.core.registries.CruxItemRegistries;
 import killercreepr.cruxshops.api.shop.trade.ShopTradeObject;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class CruxCurrencyTradeObject implements ShopTradeObject {
+public abstract class CruxCurrencyTradeObject implements ShopTradeObject {
     protected final Holder<CruxCurrency> currencyHolder;
     protected final int amount;
+    protected final ShopTradeObject original;
 
-    public CruxCurrencyTradeObject(Holder<CruxCurrency> currencyHolder, int amount) {
+    public CruxCurrencyTradeObject(Holder<CruxCurrency> currencyHolder, int amount, ShopTradeObject original) {
         this.currencyHolder = currencyHolder;
         this.amount = amount;
+        this.original = original;
+    }
+
+    @Nullable
+    @Override
+    public ShopTradeObject getOriginal() {
+        return original;
     }
 
     @Override

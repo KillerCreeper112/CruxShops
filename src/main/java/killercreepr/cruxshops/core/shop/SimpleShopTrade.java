@@ -31,7 +31,7 @@ public class SimpleShopTrade implements ShopTrade {
      */
     @Nullable
     @Override
-    public ShopTrade getOriginalTrade() {
+    public ShopTrade getOriginal() {
         return originalTrade;
     }
 

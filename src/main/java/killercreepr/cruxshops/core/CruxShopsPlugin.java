@@ -12,6 +12,7 @@ import killercreepr.cruxconfig.config.bukkit.file.CruxFolder;
 import killercreepr.cruxconfig.config.bukkit.standard.SimpleLangConfig;
 import killercreepr.cruxcore.CruxCore;
 import killercreepr.cruxshops.core.command.CruxShopCommands;
+import killercreepr.cruxshops.core.component.CruxShopsComponents;
 import killercreepr.cruxshops.core.config.CfgHook;
 import killercreepr.cruxshops.core.config.Config;
 import killercreepr.cruxshops.core.lang.Lang;
@@ -44,6 +45,7 @@ public class CruxShopsPlugin extends CruxPlugin implements Listener, LangProvide
     public void onLoad() {
         instance = this;
         super.onLoad();
+        CruxShopsComponents.register();
         CfgHook.load();
 
         new CruxShopCommands(this).register();

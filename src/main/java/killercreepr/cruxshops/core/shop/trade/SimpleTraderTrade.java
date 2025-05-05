@@ -1,17 +1,24 @@
 package killercreepr.cruxshops.core.shop.trade;
 
+import killercreepr.crux.api.component.DataComponentHandler;
+import killercreepr.crux.api.component.TypedDataComponent;
+import killercreepr.cruxshops.api.component.TraderTradeComponent;
 import killercreepr.cruxshops.api.shop.trade.ShopTrade;
 import killercreepr.cruxshops.api.shop.trade.TraderTrade;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class SimpleTraderTrade implements TraderTrade {
+import java.util.Collection;
+import java.util.HashSet;
+
+public class SimpleTraderTrade extends DataComponentHandler.Simple implements TraderTrade {
     protected final ShopTrade buyingTrade;
     protected final ShopTrade sellingTrade;
 
-    public SimpleTraderTrade(ShopTrade buyingTrade, ShopTrade sellingTrade) {
+    public SimpleTraderTrade(ShopTrade buyingTrade, ShopTrade sellingTrade, Collection<TypedDataComponent<?>> components) {
         this.buyingTrade = buyingTrade;
         this.sellingTrade = sellingTrade;
+        if(components == null) return;
+        components.forEach(this::set);
     }
 
     @Nullable
@@ -26,18 +33,28 @@ public class SimpleTraderTrade implements TraderTrade {
         return sellingTrade;
     }
 
-    @Override
-    public TraderTrade withBuyingTrade(@NotNull ShopTrade buyingTrade) {
-        return new SimpleTraderTrade(buyingTrade, sellingTrade);
+    public Collection<TypedDataComponent<?>> buildCopiedTypedCollection() {
+        Collection<TypedDataComponent<?>> list = new HashSet<>();
+        this.map.forEach((type, value) ->{
+            if(value.value() instanceof TraderTradeComponent c){
+                list.add(TypedDataComponent.createUnchecked(type, c.createCopy()));
+            }else list.add(TypedDataComponent.createUnchecked(type, value.value()));
+        });
+        return list;
     }
 
     @Override
-    public TraderTrade withSellingTrade(@NotNull ShopTrade sellingTrade) {
-        return new SimpleTraderTrade(buyingTrade, sellingTrade);
+    public TraderTrade withBuyingTrade(@Nullable ShopTrade buyingTrade) {
+        return new SimpleTraderTrade(buyingTrade, sellingTrade, buildCopiedTypedCollection());
     }
 
     @Override
-    public TraderTrade withTrades(@NotNull ShopTrade buyingTrade, @NotNull ShopTrade sellingTrade) {
-        return new SimpleTraderTrade(buyingTrade, sellingTrade);
+    public TraderTrade withSellingTrade(@Nullable ShopTrade sellingTrade) {
+        return new SimpleTraderTrade(buyingTrade, sellingTrade, buildCopiedTypedCollection());
+    }
+
+    @Override
+    public TraderTrade withTrades(@Nullable ShopTrade buyingTrade, @Nullable ShopTrade sellingTrade) {
+        return new SimpleTraderTrade(buyingTrade, sellingTrade, buildCopiedTypedCollection());
     }
 }

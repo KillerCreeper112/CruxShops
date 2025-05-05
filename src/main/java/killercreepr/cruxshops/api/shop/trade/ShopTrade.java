@@ -21,7 +21,7 @@ public interface ShopTrade {
      * @return If the original trade was modified,
      * this will return the trade before it was modified.
      */
-    @Nullable ShopTrade getOriginalTrade();
+    @Nullable ShopTrade getOriginal();
 
     /**
      * @return Whether the player can afford all the ingredients.

@@ -10,10 +10,17 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class PluginItemTradeIngredient extends PluginItemTradeObject implements ShopTradeIngredient {
-    public PluginItemTradeIngredient(ItemHolder itemHolder, int amount) {
-        super(itemHolder, amount);
+    public PluginItemTradeIngredient(ItemHolder itemHolder, int amount, ShopTradeIngredient original) {
+        super(itemHolder, amount, original);
+    }
+
+    @Nullable
+    @Override
+    public ShopTradeIngredient getOriginal() {
+        return (ShopTradeIngredient) super.getOriginal();
     }
 
     @Override
@@ -58,5 +65,10 @@ public class PluginItemTradeIngredient extends PluginItemTradeObject implements 
             if(remaining < 1) break;
         }
         return remaining;
+    }
+
+    @Override
+    public ShopTradeIngredient withAmount(int amount) {
+        return new PluginItemTradeIngredient(itemHolder, amount, this);
     }
 }

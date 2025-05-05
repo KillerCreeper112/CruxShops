@@ -6,14 +6,23 @@ import killercreepr.crux.paper.ItemHolder;
 import killercreepr.cruxshops.api.shop.trade.ShopTradeObject;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class PluginItemTradeObject implements ShopTradeObject {
+public abstract class PluginItemTradeObject implements ShopTradeObject {
     protected final ItemHolder itemHolder;
     protected final int amount;
+    protected final ShopTradeObject original;
 
-    public PluginItemTradeObject(ItemHolder itemHolder, int amount) {
+    public PluginItemTradeObject(ItemHolder itemHolder, int amount, ShopTradeObject original) {
         this.itemHolder = itemHolder;
         this.amount = amount;
+        this.original = original;
+    }
+
+    @Nullable
+    @Override
+    public ShopTradeObject getOriginal() {
+        return original;
     }
 
     public ItemStack item(){
