@@ -48,6 +48,11 @@ public class SimpleShopTrader extends DataComponentHandler.Simple implements Sho
         if(!event.callEvent()) return false;
         trade = event.getTrade();
 
+        ShopTrade finalTrade = trade;
+        forEachAllOfType(ShopTraderComponent.class, data ->{
+            data.onTradePurchased(this, e, finalTrade);
+        });
+
         trade.purchase(e);
         return true;
     }
