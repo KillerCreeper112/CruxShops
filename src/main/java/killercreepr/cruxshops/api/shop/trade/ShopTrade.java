@@ -1,5 +1,6 @@
 package killercreepr.cruxshops.api.shop.trade;
 
+import killercreepr.cruxshops.api.data.OriginalHolder;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -7,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public interface ShopTrade {
+public interface ShopTrade extends OriginalHolder {
     @NotNull
     List<ShopTradeIngredient> getIngredients();
     @NotNull List<ShopTradeResult> getResults();

@@ -1,6 +1,7 @@
 package killercreepr.cruxshops.core.component;
 
 import killercreepr.cruxshops.api.component.TraderTradeComponent;
+import killercreepr.cruxshops.api.data.OriginalHolder;
 import killercreepr.cruxshops.api.shop.trade.ShopTrade;
 import killercreepr.cruxshops.api.shop.trade.ShopTradeIngredient;
 import killercreepr.cruxshops.api.shop.trade.ShopTradeObject;
@@ -39,16 +40,11 @@ public class TraderTradeDemandComponent implements TraderTradeComponent {
         return Math.max(min, Math.min(modifier, max));
     }
 
-
     public ShopTradeObject adjustObject(ShopTradeObject result, ShopTraderDemandComponent.TradeModifier mod) {
         int baseAmount = result.getAmount();
         double modifier = getPriceModifier(demand, supply, mod.getModifier(), 0.01, 5);
         int adjustedAmount = (int) Math.round(baseAmount * modifier);
-
-        var clamp = mod.getPriceClamp();
-        if(clamp != null){
-
-        }
+        adjustedAmount = mod.clampPrice(adjustedAmount, OriginalHolder.getCompleteOriginalOrThis(result).getAmount());
 
         return result.withAmount(adjustedAmount);
     }

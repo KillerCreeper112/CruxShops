@@ -38,11 +38,13 @@ public class ShopTraderDemandComponent implements ShopTraderComponent {
 
     public static class TradeModifier{
         protected final double modifier;
-        protected final @Nullable NumberProvider priceClamp;
+        protected final @Nullable Integer priceClampMin;
+        protected final @Nullable Integer priceClampMax;
 
-        public TradeModifier(double modifier, @Nullable NumberProvider priceClamp) {
+        public TradeModifier(double modifier, @Nullable Integer priceClampMin, @Nullable Integer priceClampMax) {
             this.modifier = modifier;
-            this.priceClamp = priceClamp;
+            this.priceClampMin = priceClampMin;
+            this.priceClampMax = priceClampMax;
         }
 
         public boolean canAdjust(ShopTradeObject object){
@@ -53,9 +55,24 @@ public class ShopTraderDemandComponent implements ShopTraderComponent {
             return modifier;
         }
 
+        public int clampPrice(int price, int originalPrice){
+            if(priceClampMin != null && price < (originalPrice+priceClampMin)){
+                return originalPrice+priceClampMin;
+            }
+            if(priceClampMax != null && price > (originalPrice+priceClampMax)){
+                return originalPrice+priceClampMax;
+            }
+            return price;
+        }
+
         @Nullable
-        public NumberProvider getPriceClamp() {
-            return priceClamp;
+        public Integer getPriceClampMin() {
+            return priceClampMin;
+        }
+
+        @Nullable
+        public Integer getPriceClampMax() {
+            return priceClampMax;
         }
     }
 }
