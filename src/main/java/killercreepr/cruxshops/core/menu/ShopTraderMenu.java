@@ -1,14 +1,20 @@
 package killercreepr.cruxshops.core.menu;
 
+import killercreepr.crux.api.communication.CreateSound;
 import killercreepr.crux.api.data.DataExchange;
 import killercreepr.crux.api.data.Holder;
 import killercreepr.crux.api.item.CruxItem;
+import killercreepr.crux.api.item.dynamic.DynamicItem;
+import killercreepr.crux.api.text.context.TextParserContext;
 import killercreepr.crux.api.text.tags.TagParser;
 import killercreepr.crux.api.text.tags.container.MergedTagContainer;
+import killercreepr.crux.api.text.tags.container.TagContainer;
+import killercreepr.crux.core.Crux;
 import killercreepr.crux.core.data.util.Pair;
 import killercreepr.crux.core.text.resolver.Tag;
 import killercreepr.crux.core.util.CruxMath;
 import killercreepr.cruxmenus.api.menu.holder.MenuHolder;
+import killercreepr.cruxmenus.api.menu.slot.Slot;
 import killercreepr.cruxmenus.core.menu.ConfigMenu;
 import killercreepr.cruxmenus.core.menu.slot.SimpleFixedSlot;
 import killercreepr.cruxshops.api.shop.trade.ShopTrade;
@@ -16,9 +22,15 @@ import killercreepr.cruxshops.api.shop.trade.ShopTradeIngredient;
 import killercreepr.cruxshops.api.shop.trade.ShopTradeResult;
 import killercreepr.cruxshops.api.shop.trade.TraderTrade;
 import killercreepr.cruxshops.api.trader.ShopTrader;
+import killercreepr.cruxshops.core.CruxShopsPlugin;
+import killercreepr.cruxshops.core.config.Config;
+import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -46,9 +58,13 @@ public class ShopTraderMenu extends ConfigMenu {
         if(trader==null) return tags;
         tags.add(Tag.parsed("trade_slots", buildTradeSlotsTitle()))
             .add(Tag.parsed("page", CruxMath.format(page+1)))
-            //.add(Tag.parsed("max_page", CruxMath.format(getMaxPage()+1)))
+            .add(Tag.parsed("max_page", CruxMath.format(getMaxPage()+1)))
         ;
         return tags;
+    }
+
+    public int getMaxPage(){
+        return Math.max((int) Math.ceil((float) trades.size()/(float)MAX) - 1, 0);
     }
 
     protected List<TraderTrade> trades = new ArrayList<>();
@@ -60,6 +76,68 @@ public class ShopTraderMenu extends ConfigMenu {
         super.load();
 
         openPage(page);
+        setupPageButtons();
+    }
+
+    protected final int[] backPageIndexes = new int[]{
+        9, 17, 18, 26
+    };
+    protected final int[] nextPageIndexes = new int[]{
+        27, 35, 36, 44
+    };
+    public Slot buildBackSlot(int index){
+        return new SimpleFixedSlot(this, index){
+            @Override
+            public void onClick(@NotNull HumanEntity player, @NotNull InventoryClickEvent event) {
+                if(!(player instanceof Player p)) return;
+                int newPage = CruxMath.wrap(page-1, 0, getMaxPage());
+                if(newPage==page) return;
+                page = newPage;
+                clearItems(true);
+                clearMenuItems(true);
+                refresh();
+                CreateSound.sound(Sound.UI_BUTTON_CLICK).playFor(p);
+            }
+            @Override
+            public @Nullable ItemStack getSlottedItemReplacement() {
+                return CruxItem.create(Material.LIGHT_GRAY_STAINED_GLASS_PANE)
+                    .itemModel(Crux.key("gui/nothing"))
+                    .itemName("Back").item();
+            }
+        };
+    }
+
+    public void setupPageButtons(){
+        for(int index : backPageIndexes){
+            addSlot(buildBackSlot(index), true);
+        }
+
+        for(int index : nextPageIndexes){
+            addSlot(buildNextSlot(index), true);
+        }
+    }
+
+    public Slot buildNextSlot(int index){
+        return new SimpleFixedSlot(this, index){
+            @Override
+            public void onClick(@NotNull HumanEntity player, @NotNull InventoryClickEvent event) {
+                if(!(player instanceof Player p)) return;
+                int newPage = CruxMath.wrap(page+1, 0, getMaxPage());
+                if(newPage==page) return;
+                page = newPage;
+                clearItems(true);
+                clearMenuItems(true);
+                refresh();
+                CreateSound.sound(Sound.UI_BUTTON_CLICK).playFor(p);
+            }
+
+            @Override
+            public @Nullable ItemStack getSlottedItemReplacement() {
+                return CruxItem.create(Material.LIGHT_GRAY_STAINED_GLASS_PANE)
+                    .itemModel(Crux.key("gui/nothing"))
+                    .itemName("Next").item();
+            }
+        };
     }
 
     public boolean canUse(ShopTrade trade, Entity e){
@@ -121,16 +199,38 @@ public class ShopTraderMenu extends ConfigMenu {
         return current;
     }
 
-    public CruxItem applySellingItem(CruxItem item, ShopTrade trade){
-        return item;
+    public Config cfg(){
+        return CruxShopsPlugin.inst().values();
     }
 
-    public CruxItem applyBuyingItem(CruxItem item, ShopTrade trade){
-        return item;
+    public CruxItem applySellingItem(CruxItem item, ShopTrade trade, TraderTrade traderTrade){
+        Config cfg = cfg();
+        DynamicItem displayItem = cfg.SELLING_ITEM.value();
+        if(displayItem == null) return item;
+        MergedTagContainer tags = trader.buildTags(trade);
+        if(tags == null) tags = TagContainer.merged();
+        tags.hook(trade).hook(traderTrade);
+        return displayItem.applyComponents(item, TextParserContext.builder().tags(tags).build());
     }
 
-    public CruxItem applyResultItem(CruxItem item, ShopTrade trade){
-        return item;
+    public CruxItem applyBuyingItem(CruxItem item, ShopTrade trade, TraderTrade traderTrade){
+        Config cfg = cfg();
+        DynamicItem displayItem = cfg.BUYING_ITEM.value();
+        if(displayItem == null) return item;
+        MergedTagContainer tags = trader.buildTags(trade);
+        if(tags == null) tags = TagContainer.merged();
+        tags.hook(trade).hook(traderTrade);
+        return displayItem.applyComponents(item, TextParserContext.builder().tags(tags).build());
+    }
+
+    public CruxItem applyResultItem(CruxItem item, ShopTrade trade, TraderTrade traderTrade){
+        Config cfg = cfg();
+        DynamicItem displayItem = cfg.RESULT_ITEM.value();
+        if(displayItem == null) return item;
+        MergedTagContainer tags = trader.buildTags(trade);
+        if(tags == null) tags = TagContainer.merged();
+        tags.hook(trade).hook(traderTrade);
+        return displayItem.applyComponents(item, TextParserContext.builder().tags(tags).build());
     }
 
     protected int page = 0;
@@ -151,7 +251,7 @@ public class ShopTraderMenu extends ConfigMenu {
 
     public BiConsumer<HumanEntity, InventoryClickEvent> buildResultClick(TraderTrade trade){
         return (p, event) ->{
-            p.sendMessage("todo");
+            //p.sendMessage("todo");
         };
     }
 
@@ -190,25 +290,49 @@ public class ShopTraderMenu extends ConfigMenu {
         Map<Integer, Pair<CruxItem, BiConsumer<HumanEntity, InventoryClickEvent>>> map = new HashMap<>();
         //0, 1, 2
         ShopTrade mainTrade = null;
+        ItemStack icon = null;
         var buying = trade.getBuyingTrade();
         if(buying == null) map.put(0, null);
         else{
             mainTrade = buying;
+            icon = buildResultIcon((mainTrade));
             ShopTradeIngredient ingredient = buying.getIngredients().getFirst();
-            map.put(0, new Pair<>(applyBuyingItem(CruxItem.wrap(ingredient.buildIcon()), buying), buildBuyingClick(trade)));
+            map.put(0, new Pair<>(applyBuyingItem(applyItem(icon, ingredient.buildIcon()), buying, trade), buildBuyingClick(trade)));
         }
 
         var selling = trade.getSellingTrade();
         if(selling == null) map.put(2, null);
         else{
-            if(mainTrade == null) mainTrade = selling;
+            if(mainTrade == null){
+                mainTrade = selling;
+                icon = buildResultIcon((mainTrade));
+            }
             ShopTradeResult result = selling.getResults().getFirst();
-            map.put(2, new Pair<>(applySellingItem(CruxItem.wrap(result.buildIcon()), selling), buildSellingClick(trade)));
+            map.put(2, new Pair<>(applySellingItem(applyItem(icon, result.buildIcon()), selling, trade), buildSellingClick(trade)));
         }
         if(mainTrade != null){
-            map.put(1, new Pair<>(applyResultItem(CruxItem.wrap(mainTrade.getResults().getFirst().buildIcon()), selling), buildResultClick(trade)));
+            map.put(1, new Pair<>(applyResultItem(CruxItem.wrap(icon), selling, trade), buildResultClick(trade)));
         }
         return map;
+    }
+
+    public CruxItem applyItem(ItemStack icon, ItemStack ingredient){
+        icon = icon.clone();
+        ItemStack finalIcon = icon;
+        ingredient.editMeta(meta ->{
+            finalIcon.editMeta(iconMeta ->{
+                if(meta.hasItemModel()){
+                    iconMeta.setItemModel(meta.getItemModel());
+                }else iconMeta.setItemModel(null);
+                iconMeta.setMaxStackSize(CruxItem.getMaxStackSize(ingredient));
+            });
+        });
+        icon.setAmount(ingredient.getAmount());
+        return CruxItem.wrap(icon);
+    }
+
+    public ItemStack buildResultIcon(ShopTrade trade){
+        return trade.getResults().getFirst().buildIcon();
     }
 
     public int getStartingInvSlotFromTradeIndex(int index){

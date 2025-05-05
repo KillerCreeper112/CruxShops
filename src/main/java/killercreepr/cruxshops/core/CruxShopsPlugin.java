@@ -2,6 +2,7 @@ package killercreepr.cruxshops.core;
 
 import killercreepr.crux.api.communication.lang.CreateLang;
 import killercreepr.crux.api.communication.lang.LangProvider;
+import killercreepr.crux.core.Crux;
 import killercreepr.crux.core.communication.lang.LangPopulator;
 import killercreepr.crux.core.communication.lang.Msg;
 import killercreepr.crux.core.communication.lang.SimpleCreateLang;
@@ -16,6 +17,8 @@ import killercreepr.cruxshops.core.component.CruxShopsComponents;
 import killercreepr.cruxshops.core.config.CfgHook;
 import killercreepr.cruxshops.core.config.Config;
 import killercreepr.cruxshops.core.lang.Lang;
+import killercreepr.cruxshops.core.text.tags.object.ShopTradeTags;
+import killercreepr.cruxshops.core.text.tags.object.TraderTradeTags;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 
@@ -47,6 +50,11 @@ public class CruxShopsPlugin extends CruxPlugin implements Listener, LangProvide
         super.onLoad();
         CruxShopsComponents.register();
         CfgHook.load();
+
+        Crux.tags().register(
+            new ShopTradeTags(),
+            new TraderTradeTags()
+        );
 
         new CruxShopCommands(this).register();
     }
@@ -81,7 +89,7 @@ public class CruxShopsPlugin extends CruxPlugin implements Listener, LangProvide
     @Override
     public void reload() {
         super.reload();
-        values.reload();
+        values.setup();
         langProvider.reload(this);
 
         CfgHook.reload(this);

@@ -3,6 +3,8 @@ package killercreepr.cruxshops.core.trader;
 import killercreepr.crux.api.component.DataComponentHandler;
 import killercreepr.crux.api.component.TypedDataComponent;
 import killercreepr.crux.api.data.tick.TickedTime;
+import killercreepr.crux.api.text.tags.container.MergedTagContainer;
+import killercreepr.crux.api.text.tags.container.TagContainer;
 import killercreepr.cruxshops.api.component.ShopTraderComponent;
 import killercreepr.cruxshops.api.event.EntityPurchaseTraderTradeEvent;
 import killercreepr.cruxshops.api.profession.TraderProfession;
@@ -40,6 +42,13 @@ public class SimpleShopTrader extends DataComponentHandler.Simple implements Sho
     public void setTrades(@NotNull List<TraderTrade> trades) {
         this.trades.clear();
         this.trades.addAll(trades);
+    }
+
+    @Override
+    public MergedTagContainer buildTags(ShopTrade trade){
+        var tags = TagContainer.merged();
+        forEachAllOfType(ShopTraderComponent.class, data -> tags.addAll(data.buildTags(this, trade)));
+        return tags;
     }
 
     @Override
