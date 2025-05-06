@@ -2,10 +2,8 @@ package killercreepr.cruxshops.core.component;
 
 import killercreepr.cruxshops.api.component.TraderTradeComponent;
 import killercreepr.cruxshops.api.data.OriginalHolder;
-import killercreepr.cruxshops.api.shop.trade.ShopTrade;
-import killercreepr.cruxshops.api.shop.trade.ShopTradeIngredient;
-import killercreepr.cruxshops.api.shop.trade.ShopTradeObject;
-import killercreepr.cruxshops.api.shop.trade.ShopTradeResult;
+import killercreepr.cruxshops.api.shop.trade.*;
+import org.bukkit.Bukkit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,48 +12,81 @@ public class TraderTradeDemandComponent implements TraderTradeComponent {
     protected int demand;
     protected int supply;
 
-    public ShopTrade adjustTrade(ShopTrade trade, ShopTraderDemandComponent.TradeModifier modifier){
-        List<ShopTradeIngredient> ingredients = new ArrayList<>();
-        List<ShopTradeResult> results = new ArrayList<>();
+    public ShopTrade adjustTrade(TraderTrade traderTrade, ShopTrade trade, ShopTraderDemandComponent.TradeModifier modifier){
+        TradeType type = trade.equals(traderTrade.getSellingTrade()) ? TradeType.SELL : TradeType.BUY;
 
-        trade.getIngredients().forEach(ingredient -> {
-            if(modifier.canAdjust(ingredient)){
-                ingredient = adjustIngredient(ingredient, modifier);
+        Bukkit.broadcastMessage("demand= " + demand + ", supply= " + supply);
+        switch (type){
+            case BUY -> {
+                List<ShopTradeIngredient> ingredients = new ArrayList<>();
+                trade.getIngredients().forEach(ingredient -> {
+                    if(modifier.canAdjust(ingredient)){
+                        ingredient = adjustIngredient(ingredient, modifier, type);
+                    }
+                    if(ingredient != null) ingredients.add(ingredient);
+                });
+                return trade.withIngredients(ingredients);
             }
-            if(ingredient != null) ingredients.add(ingredient);
-        });
-
-        trade.getResults().forEach(ingredient -> {
-            if(modifier.canAdjust(ingredient)){
-                ingredient = adjustResult(ingredient, modifier);
+            case SELL -> {
+                List<ShopTradeResult> results = new ArrayList<>();
+                trade.getResults().forEach(ingredient -> {
+                    if(modifier.canAdjust(ingredient)){
+                        ingredient = adjustResult(ingredient, modifier, type);
+                    }
+                    if(ingredient != null) results.add(ingredient);
+                });
+                return trade.withResults(results);
             }
-            if(ingredient != null) results.add(ingredient);
-        });
+        }
 
-        return trade.withIngredients(ingredients).withResults(results);
+        return trade;
     }
 
-    protected double getPriceModifier(int demand, int supply, double sensitivity, double min, double max) {
+    protected double getBuyModifier(int demand, int supply, double sensitivity, double min, double max) {
+        // Higher demand increases price, more supply reduces it
         double modifier = 1.0 + (demand - supply) * sensitivity;
         return Math.max(min, Math.min(modifier, max));
     }
 
-    public ShopTradeObject adjustObject(ShopTradeObject result, ShopTraderDemandComponent.TradeModifier mod) {
+    protected double getSellModifier(int demand, int supply, double sensitivity, double min, double max) {
+        // More supply decreases price, higher demand increases it — but reversed effect for sellers
+        double modifier = 1.0 - (supply - demand) * sensitivity;
+        return Math.max(min, Math.min(modifier, max));
+    }
+
+
+    public ShopTradeObject adjustObject(ShopTradeObject result, ShopTraderDemandComponent.TradeModifier mod, TradeType type) {
         int baseAmount = result.getAmount();
-        double modifier = getPriceModifier(demand, supply, mod.getModifier(), 0.01, 5);
+        double modifier;
+
+        if (type == TradeType.BUY) {
+            modifier = getBuyModifier(demand, supply, mod.getModifier(), 0.01, 5);
+        } else {
+            modifier = getSellModifier(demand, supply, mod.getModifier(), 0.01, 5);
+        }
+        Bukkit.broadcastMessage(type + " = " + modifier);
+
         int adjustedAmount = (int) Math.round(baseAmount * modifier);
         adjustedAmount = mod.clampPrice(adjustedAmount, OriginalHolder.getCompleteOriginalOrThis(result).getAmount());
 
         return result.withAmount(adjustedAmount);
     }
 
-    public ShopTradeResult adjustResult(ShopTradeResult result, ShopTraderDemandComponent.TradeModifier mod) {
-        return (ShopTradeResult) adjustObject(result, mod);
+    public enum TradeType {
+        BUY,
+        SELL
     }
 
-    public ShopTradeIngredient adjustIngredient(ShopTradeIngredient ingredient, ShopTraderDemandComponent.TradeModifier mod) {
-        return (ShopTradeIngredient) adjustObject(ingredient, mod);
+    public ShopTradeResult adjustResult(ShopTradeResult result, ShopTraderDemandComponent.TradeModifier mod,
+                                        TradeType type) {
+        return (ShopTradeResult) adjustObject(result, mod, type);
     }
+
+    public ShopTradeIngredient adjustIngredient(ShopTradeIngredient ingredient, ShopTraderDemandComponent.TradeModifier mod,
+                                                TradeType type) {
+        return (ShopTradeIngredient) adjustObject(ingredient, mod, type);
+    }
+
 
     public int addDemand(int amount){
         setDemand(demand+amount);

@@ -7,12 +7,17 @@ import killercreepr.cruxshops.api.shop.trade.ShopTrade;
 import killercreepr.cruxshops.api.shop.trade.TraderTrade;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public interface ShopTrader extends TraderTradesHolder, DataComponentAccessor {
     @NotNull TraderProfession getProfession();
     void setTrades(@NotNull List<TraderTrade> trades);
+
+    @Nullable TraderTrade adjustTrade(@NotNull Entity viewer, @NotNull TraderTrade trade);
+
+    @NotNull List<TraderTrade> adjustTrades(@NotNull Entity viewer, @NotNull List<TraderTrade> trades);
 
     boolean purchaseTrade(@NotNull Entity e, @NotNull TraderTrade traderTrade, @NotNull ShopTrade trade);
 

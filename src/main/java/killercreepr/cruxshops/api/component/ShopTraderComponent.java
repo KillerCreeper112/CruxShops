@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface ShopTraderComponent {
-    default @Nullable TraderTrade adjustTrade(@NotNull ShopTrader trader, @NotNull TraderTrade trade){ return null; }
+    default @Nullable TraderTrade adjustTrade(@NotNull ShopTrader trader, @NotNull Entity viewer, @NotNull TraderTrade trade){ return null; }
     default void onTradePurchased(@NotNull ShopTrader trader, @NotNull Entity e, @NotNull TraderTrade traderTrade, @NotNull ShopTrade trade){
 
     }

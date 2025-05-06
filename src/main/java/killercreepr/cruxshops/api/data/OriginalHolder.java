@@ -3,10 +3,8 @@ package killercreepr.cruxshops.api.data;
 public interface OriginalHolder {
     static <T extends OriginalHolder> T getCompleteOriginalOrThis(T trade){
         OriginalHolder current = trade;
-        OriginalHolder next = trade.getOriginal();
-        while(next != null){
-            next = next.getOriginal();
-            if(next != null) current = next;
+        while (current.getOriginal() != null) {
+            current = current.getOriginal();
         }
         return (T) current;
     }

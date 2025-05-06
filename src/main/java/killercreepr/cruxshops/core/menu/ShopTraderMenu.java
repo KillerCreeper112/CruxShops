@@ -66,6 +66,8 @@ public class ShopTraderMenu extends ConfigMenu {
         return Math.max((int) Math.ceil((float) trades.size()/(float)MAX) - 1, 0);
     }
 
+
+
     protected List<TraderTrade> trades = new ArrayList<>();
     @Override
     public void load() {

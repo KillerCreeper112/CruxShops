@@ -15,6 +15,7 @@ import killercreepr.cruxmenus.api.menu.holder.MenuHolder;
 import killercreepr.cruxmenus.api.menu.slot.Slot;
 import killercreepr.cruxmenus.core.menu.ConfigMenu;
 import killercreepr.cruxmenus.core.menu.slot.SimpleFixedSlot;
+import killercreepr.cruxshops.api.data.OriginalHolder;
 import killercreepr.cruxshops.api.shop.trade.ShopTrade;
 import killercreepr.cruxshops.api.shop.trade.TraderTrade;
 import killercreepr.cruxshops.api.trader.ShopTrader;
@@ -35,7 +36,7 @@ import java.util.function.BiConsumer;
 
 public class ShopTraderSelectMenu extends ConfigMenu {
     protected final @NotNull ShopTrader trader;
-    protected final @NotNull TraderTrade trade;
+    protected @NotNull TraderTrade trade;
 
     public ShopTraderSelectMenu(@NotNull MenuHolder holder, @NotNull DataExchange info) {
         this(holder, info, null);
@@ -56,14 +57,14 @@ public class ShopTraderSelectMenu extends ConfigMenu {
         ;
         return tags;
     }
-    public BiConsumer<HumanEntity, InventoryClickEvent> buildSellingClick(TraderTrade trade){
-        return purchaseTradeConsumer(trade::getSellingTrade, trade);
+    public BiConsumer<HumanEntity, InventoryClickEvent> buildSellingClick(){
+        return purchaseTradeConsumer(trade::getSellingTrade);
     }
 
-    public BiConsumer<HumanEntity, InventoryClickEvent> buildBuyingClick(TraderTrade trade){
-        return purchaseTradeConsumer(trade::getBuyingTrade, trade);
+    public BiConsumer<HumanEntity, InventoryClickEvent> buildBuyingClick(){
+        return purchaseTradeConsumer(trade::getBuyingTrade);
     }
-    public BiConsumer<HumanEntity, InventoryClickEvent> purchaseTradeConsumer(Holder<ShopTrade> holder, TraderTrade traderTrade){
+    public BiConsumer<HumanEntity, InventoryClickEvent> purchaseTradeConsumer(Holder<ShopTrade> holder){
         return (p, event) ->{
             var t = holder.value();
             if(t == null) return;
@@ -83,7 +84,7 @@ public class ShopTraderSelectMenu extends ConfigMenu {
                 return;
             }*/
 
-            if(trader.purchaseTrade(p, traderTrade, t)){
+            if(trader.purchaseTrade(p, trade, t)){
                 clearItems(true);
                 clearMenuItems(true);
                 load();
@@ -95,7 +96,8 @@ public class ShopTraderSelectMenu extends ConfigMenu {
 
     @Override
     public void load() {
-        //var viewer = info().getOrThrow("viewer", Entity.class);
+        var viewer = info().getOrThrow("viewer", Entity.class);
+        this.trade = this.trader.adjustTrade(viewer, OriginalHolder.getCompleteOriginalOrThis(this.trade));
 
         super.load();
 
@@ -152,7 +154,7 @@ public class ShopTraderSelectMenu extends ConfigMenu {
             var buyTrade = trade;
             ItemStack icon = trade.getResults().getFirst().buildIcon();
 
-            var click = buildBuyingClick(this.trade);
+            var click = buildBuyingClick();
             holder.info().getOrThrow("buy_indexes", List.class).forEach(obj ->{
                 setItem(
                     ((Number) (obj)).intValue(),
@@ -192,7 +194,7 @@ public class ShopTraderSelectMenu extends ConfigMenu {
         if(trade != null){
             ItemStack icon = trade.getIngredients().getFirst().buildIcon();
             var sellTrade = trade;
-            var click = buildSellingClick(this.trade);
+            var click = buildSellingClick();
             holder.info().getOrThrow("sell_indexes", List.class).forEach(obj ->{
                 setItem(
                     ((Number) (obj)).intValue(),

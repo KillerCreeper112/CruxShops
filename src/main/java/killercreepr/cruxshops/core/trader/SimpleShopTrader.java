@@ -15,6 +15,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,6 +29,7 @@ public class SimpleShopTrader extends DataComponentHandler.Simple implements Sho
     public SimpleShopTrader(Key key, TraderProfession profession, Collection<TypedDataComponent<?>> components) {
         this.key = key;
         this.profession = profession;
+        setTrades(profession.getAllTrades());
         if(components == null) return;
         components.forEach(this::set);
     }
@@ -42,6 +44,45 @@ public class SimpleShopTrader extends DataComponentHandler.Simple implements Sho
     public void setTrades(@NotNull List<TraderTrade> trades) {
         this.trades.clear();
         this.trades.addAll(trades);
+    }
+
+    @Nullable
+    @Override
+    public TraderTrade adjustTrade(@NotNull Entity viewer, @NotNull TraderTrade trade) {
+        var data = getAllOfType(ShopTraderComponent.class);
+        if(!data.isEmpty()){
+            TraderTrade adjusted = trade;
+            for(var comp : data){
+                adjusted = comp.adjustTrade(this, viewer, adjusted);
+                if(adjusted == null) break;
+            }
+            return adjusted;
+        }
+        return trade;
+    }
+
+    @NotNull
+    @Override
+    public List<TraderTrade> adjustTrades(@NotNull Entity viewer, @NotNull List<TraderTrade> trades) {
+        if(trades.isEmpty()) return trades;
+        var data = getAllOfType(ShopTraderComponent.class);
+        if(data.isEmpty()) return trades;
+        int index = -1;
+        for(TraderTrade trade : new ArrayList<>(trades)){
+            index++;
+            TraderTrade adjusted = trade;
+            for(var comp : data){
+                adjusted = comp.adjustTrade(this, viewer, adjusted);
+                if(adjusted == null){
+                    trades.remove(index);
+                    index--;
+                    break;
+                }
+                if(adjusted==trade) continue;
+                trades.set(index, adjusted);
+            }
+        }
+        return trades;
     }
 
     @Override
@@ -90,29 +131,8 @@ public class SimpleShopTrader extends DataComponentHandler.Simple implements Sho
     @Override
     public List<TraderTrade> getTrades(@NotNull Entity viewer) {
         List<TraderTrade> trades = new ArrayList<>(this.trades);
-        if(trades.isEmpty()) setTrades(profession.getAllTrades());
         trades.removeIf(t -> !t.canView(viewer));
-
-        if(!trades.isEmpty()){
-            var data = getAllOfType(ShopTraderComponent.class);
-            if(!data.isEmpty()){
-                int index = -1;
-                for(TraderTrade trade : new ArrayList<>(trades)){
-                    index++;
-                    TraderTrade adjusted = trade;
-                    for(var comp : data){
-                        adjusted = comp.adjustTrade(this, adjusted);
-                        if(adjusted == null){
-                            trades.remove(index);
-                            index--;
-                            break;
-                        }
-                        if(adjusted==trade) continue;
-                        trades.set(index, adjusted);
-                    }
-                }
-            }
-        }
+        adjustTrades(viewer, trades);
         return trades;
     }
 

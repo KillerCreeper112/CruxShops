@@ -185,7 +185,7 @@ public class CfgHook {
                 Collection<TypedDataComponent<?>> components = null;
                 String componentText = reg.deserializeFromFile(String.class, o.get("components"));
                 if(componentText != null) components = DataComponentDecoder.componentDecoder().parseComponents(componentText);
-                return new SimpleTraderTrade(buying, selling, components);
+                return new SimpleTraderTrade(buying, selling, components, null);
             }
 
             @Override
@@ -225,7 +225,7 @@ public class CfgHook {
                 Collection<TypedDataComponent<?>> components = null;
                 String componentText = reg.deserializeFromFile(String.class, o.get("components"));
                 if(componentText != null) components = DataComponentDecoder.componentDecoder().parseComponents(componentText);
-                return new SimpleTraderTrade(buying, selling, components);
+                return new SimpleTraderTrade(buying, selling, components,  null);
             }
 
             @Override

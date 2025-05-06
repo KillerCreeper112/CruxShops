@@ -1,6 +1,7 @@
 package killercreepr.cruxshops.core.component;
 
 import killercreepr.cruxshops.api.component.ShopTraderComponent;
+import killercreepr.cruxshops.api.data.OriginalHolder;
 import killercreepr.cruxshops.api.shop.trade.ShopTrade;
 import killercreepr.cruxshops.api.shop.trade.ShopTradeObject;
 import killercreepr.cruxshops.api.shop.trade.TraderTrade;
@@ -21,12 +22,13 @@ public class ShopTraderDemandComponent implements ShopTraderComponent {
 
     @Override
     public void onTradePurchased(@NotNull ShopTrader trader, @NotNull Entity e, @NotNull TraderTrade traderTrade, @NotNull ShopTrade trade) {
-        var data = traderTrade.get(CruxShopsComponents.TRADER_TRADE_DEMAND);
+        var original = OriginalHolder.getCompleteOriginalOrThis(traderTrade);
+        var data = original.get(CruxShopsComponents.TRADER_TRADE_DEMAND);
         if(data == null) return;
         if(trade.equals(traderTrade.getBuyingTrade())){
-            data.addSupply(1);
-        }else if(trade.equals(traderTrade.getSellingTrade())){
             data.addDemand(1);
+        }else if(trade.equals(traderTrade.getSellingTrade())){
+            data.addSupply(1);
         }else throw new UnsupportedOperationException("What the heck??");
     }
 
@@ -42,16 +44,16 @@ public class ShopTraderDemandComponent implements ShopTraderComponent {
 
     @Nullable
     @Override
-    public TraderTrade adjustTrade(@NotNull ShopTrader trader, @NotNull TraderTrade trade) {
-        TraderTradeDemandComponent data = trader.get(CruxShopsComponents.TRADER_TRADE_DEMAND);
+    public TraderTrade adjustTrade(@NotNull ShopTrader trader, @NotNull Entity viewer, @NotNull TraderTrade trade) {
+        TraderTradeDemandComponent data = trade.get(CruxShopsComponents.TRADER_TRADE_DEMAND);
         if(data==null) return trade;
         ShopTrade buying = trade.getBuyingTrade();
         ShopTrade selling = trade.getSellingTrade();
         if(buying !=null){
-            buying = data.adjustTrade(buying, buyingModifier);
+            buying = data.adjustTrade(trade, buying, buyingModifier);
         }
         if(selling != null){
-            selling = data.adjustTrade(selling, sellingModifier);
+            selling = data.adjustTrade(trade, selling, sellingModifier);
         }
         if(buying == null && selling == null) return null;
         return trade.withTrades(buying, selling);
