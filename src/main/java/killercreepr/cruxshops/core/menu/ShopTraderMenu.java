@@ -25,6 +25,7 @@ import killercreepr.cruxshops.api.shop.trade.TraderTrade;
 import killercreepr.cruxshops.api.trader.ShopTrader;
 import killercreepr.cruxshops.core.CruxShopsPlugin;
 import killercreepr.cruxshops.core.config.Config;
+import net.kyori.adventure.key.Key;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -270,7 +271,14 @@ public class ShopTraderMenu extends ConfigMenu {
 
     public BiConsumer<HumanEntity, InventoryClickEvent> buildResultClick(TraderTrade trade){
         return (p, event) ->{
-            //p.sendMessage("todo");
+            Key key = Crux.key(info().getOrThrow("cruxshops/trade_select_menu", String.class));
+            holder.getRegistry().menuHolders().get(key).open(
+                p, DataExchange.builder()
+                    .put("trade", trade)
+                    .put("trader", trader)
+                    .build()
+            );
+            CreateSound.sound(Sound.UI_BUTTON_CLICK).playFor(p);
         };
     }
 
