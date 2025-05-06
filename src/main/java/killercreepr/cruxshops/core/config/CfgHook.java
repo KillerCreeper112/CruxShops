@@ -31,6 +31,7 @@ import killercreepr.cruxshops.api.trader.ShopTrader;
 import killercreepr.cruxshops.core.config.handler.*;
 import killercreepr.cruxshops.core.config.loader.CfgShopTraderLoader;
 import killercreepr.cruxshops.core.menu.ShopTraderMenu;
+import killercreepr.cruxshops.core.menu.ShopTraderSelectMenu;
 import killercreepr.cruxshops.core.profession.SimpleTraderProfession;
 import killercreepr.cruxshops.core.shop.SimpleShopTrade;
 import killercreepr.cruxshops.core.shop.trade.SimpleTraderTrade;
@@ -95,7 +96,12 @@ public class CfgHook {
                             };
                         }
                         case "simple_select" ->{
-
+                            return new SimpleMenuHolder(current.key(), current.getTitle(), current.getSize(), current.getItems(), current.info(), current.getModules()){
+                                @Override
+                                public @NotNull ConfigMenu createMenu(@NotNull DataExchange data, @Nullable MergedTagContainer tags) {
+                                    return new ShopTraderSelectMenu(this, data);
+                                }
+                            };
                         }
                     }
                     return current;

@@ -43,14 +43,15 @@ import java.util.function.BiConsumer;
 public class ShopTraderSelectMenu extends ConfigMenu {
     protected final @NotNull ShopTrader trader;
     protected final @NotNull TraderTrade trade;
-    public ShopTraderSelectMenu(@NotNull MenuHolder holder, @NotNull DataExchange info, TraderTrade trade) {
-        this(holder, info, null, trade);
+
+    public ShopTraderSelectMenu(@NotNull MenuHolder holder, @NotNull DataExchange info) {
+        this(holder, info, null);
     }
 
-    public ShopTraderSelectMenu(@NotNull MenuHolder holder, @NotNull DataExchange info, @Nullable MergedTagContainer tags, @NotNull TraderTrade trade) {
+    public ShopTraderSelectMenu(@NotNull MenuHolder holder, @NotNull DataExchange info, @Nullable MergedTagContainer tags) {
         super(holder, info, tags);
         this.trader = info.getWithDefault("trader", ShopTrader.class, i -> i.getOrThrow(ShopTrader.class));
-        this.trade = trade;
+        this.trade = info.getWithDefault("trade", TraderTrade.class, i -> i.getOrThrow(TraderTrade.class));
     }
 
     @NotNull
@@ -65,13 +66,33 @@ public class ShopTraderSelectMenu extends ConfigMenu {
 
     @Override
     public void load() {
-        var viewer = info().getOrThrow("viewer", Entity.class);
-        trades.clear();
-        trades.addAll(trader.getTrades(viewer));
+        //var viewer = info().getOrThrow("viewer", Entity.class);
 
         super.load();
 
+        setupTrades();
         setupPageButtons();
+    }
+
+    public void setupTrades(){
+        var trade = this.trade.getBuyingTrade();
+        if(trade != null){
+            setItem(
+                info().getOrThrow("buy_ingredient_index", Number.class).intValue(), trade.getIngredients().getFirst().buildIcon()
+            );
+            setItem(
+                info().getOrThrow("buy_result_index", Number.class).intValue(), trade.getResults().getFirst().buildIcon()
+            );
+        }
+        trade = this.trade.getSellingTrade();
+        if(trade != null){
+            setItem(
+                info().getOrThrow("sell_ingredient_index", Number.class).intValue(), trade.getIngredients().getFirst().buildIcon()
+            );
+            setItem(
+                info().getOrThrow("sell_result_index", Number.class).intValue(), trade.getResults().getFirst().buildIcon()
+            );
+        }
     }
 
     public void setupPageButtons(){
