@@ -4,6 +4,8 @@ import com.google.common.reflect.TypeToken;
 import killercreepr.crux.api.component.TypedDataComponent;
 import killercreepr.crux.api.component.parser.DataComponentDecoder;
 import killercreepr.crux.api.data.DataExchange;
+import killercreepr.crux.api.data.Loadable;
+import killercreepr.crux.api.data.PluginLoadable;
 import killercreepr.crux.api.loot.conditions.LootCondition;
 import killercreepr.crux.api.text.tags.container.MergedTagContainer;
 import killercreepr.crux.core.Crux;
@@ -33,6 +35,7 @@ import killercreepr.cruxshops.core.config.loader.CfgShopTraderLoader;
 import killercreepr.cruxshops.core.menu.ShopTraderMenu;
 import killercreepr.cruxshops.core.menu.ShopTraderSelectMenu;
 import killercreepr.cruxshops.core.profession.SimpleTraderProfession;
+import killercreepr.cruxshops.core.registries.ShopsRegistries;
 import killercreepr.cruxshops.core.shop.SimpleShopTrade;
 import killercreepr.cruxshops.core.shop.trade.SimpleTraderTrade;
 import killercreepr.cruxshops.core.shop.trade.ingredient.CruxCurrencyTradeIngredient;
@@ -111,9 +114,25 @@ public class CfgHook {
     }
 
     public static void reload(CruxPlugin plugin){
+        ShopsRegistries.SHOP_TRADER.forEach(shop ->{
+            if(shop instanceof PluginLoadable l){
+                l.save(plugin);
+            }else if(shop instanceof Loadable l){
+                l.save();
+            }
+        });
+
         new CfgShopTraderLoader(SHOP_TRADER).loadConfiguration(
             new CruxFolder(plugin, "shops").file()
         );
+
+        ShopsRegistries.SHOP_TRADER.forEach(shop ->{
+            if(shop instanceof PluginLoadable l){
+                l.load(plugin);
+            }else if(shop instanceof Loadable l){
+                l.load();
+            }
+        });
     }
 
     public static void registerHandlers(FileRegistry reg){

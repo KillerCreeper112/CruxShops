@@ -2,6 +2,9 @@ package killercreepr.cruxshops.core;
 
 import killercreepr.crux.api.communication.lang.CreateLang;
 import killercreepr.crux.api.communication.lang.LangProvider;
+import killercreepr.crux.api.data.Loadable;
+import killercreepr.crux.api.data.PluginLoadable;
+import killercreepr.crux.api.valueproviders.number.NumberProvider;
 import killercreepr.crux.core.Crux;
 import killercreepr.crux.core.communication.lang.LangPopulator;
 import killercreepr.crux.core.communication.lang.Msg;
@@ -9,18 +12,25 @@ import killercreepr.crux.core.communication.lang.SimpleCreateLang;
 import killercreepr.crux.core.plugin.CruxPlugin;
 import killercreepr.crux.core.plugin.module.StandardModules;
 import killercreepr.crux.core.registries.CruxRegistries;
+import killercreepr.cruxconfig.config.bukkit.file.BukkitDataFile;
 import killercreepr.cruxconfig.config.bukkit.file.CruxFolder;
 import killercreepr.cruxconfig.config.bukkit.standard.SimpleLangConfig;
+import killercreepr.cruxconfig.config.common.file.DataFile;
 import killercreepr.cruxcore.CruxCore;
+import killercreepr.cruxshops.api.market.Market;
 import killercreepr.cruxshops.core.command.CruxShopCommands;
 import killercreepr.cruxshops.core.component.CruxShopsComponents;
 import killercreepr.cruxshops.core.config.CfgHook;
 import killercreepr.cruxshops.core.config.Config;
 import killercreepr.cruxshops.core.lang.Lang;
+import killercreepr.cruxshops.core.market.SimpleMarket;
+import killercreepr.cruxshops.core.registries.ShopsRegistries;
 import killercreepr.cruxshops.core.text.tags.object.ShopTradeTags;
 import killercreepr.cruxshops.core.text.tags.object.TraderTradeTags;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Map;
 
 public class CruxShopsPlugin extends CruxPlugin implements Listener, LangProvider {
     private static CruxShopsPlugin instance;
@@ -43,6 +53,8 @@ public class CruxShopsPlugin extends CruxPlugin implements Listener, LangProvide
     }
 
     protected LangProvider langProvider;
+
+    protected Market globalMarket;
 
     @Override
     public void onLoad() {
@@ -84,6 +96,15 @@ public class CruxShopsPlugin extends CruxPlugin implements Listener, LangProvide
     @Override
     public void disabled() {
         super.disabled();
+        globalMarket.setStopped();
+
+        ShopsRegistries.SHOP_TRADER.forEach(shop ->{
+            if(shop instanceof PluginLoadable l){
+                l.save(this);
+            }else if(shop instanceof Loadable l){
+                l.save();
+            }
+        });
     }
 
     @Override
@@ -97,5 +118,23 @@ public class CruxShopsPlugin extends CruxPlugin implements Listener, LangProvide
         CruxCore.inst().cruxMenus().menuRegistry().loadConfiguration(
             new CruxFolder(this, "menus").file()
         );
+
+        if(globalMarket != null){
+            globalMarket.setStopped();
+            globalMarket = null;
+        }
+        DataFile file = BukkitDataFile.parseFromGeneralPath(
+            new CruxFolder(this, "market").file(), false
+        );
+        if(file == null){
+            return;
+        }
+        NumberProvider tick = file.deserialize("tick_delay", NumberProvider.class);
+        file.close();
+        globalMarket = new SimpleMarket(
+            this, tick.value().intValue(), ShopsRegistries.SHOP_TRADER, NumberProvider.zero(), Map.of(),
+            NumberProvider.zero(), NumberProvider.zero()
+        );
+        globalMarket.setStarted();
     }
 }

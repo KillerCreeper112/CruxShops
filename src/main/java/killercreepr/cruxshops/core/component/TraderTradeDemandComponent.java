@@ -1,12 +1,19 @@
 package killercreepr.cruxshops.core.component;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import killercreepr.cruxconfig.config.common.FileContext;
+import killercreepr.cruxconfig.config.common.element.FileElement;
+import killercreepr.cruxconfig.config.common.element.FileObject;
 import killercreepr.cruxshops.api.component.TraderTradeComponent;
 import killercreepr.cruxshops.api.data.OriginalHolder;
 import killercreepr.cruxshops.api.shop.trade.*;
+import killercreepr.cruxshops.api.trader.ShopTrader;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +25,29 @@ public class TraderTradeDemandComponent implements TraderTradeComponent, Keyed {
 
     public TraderTradeDemandComponent(Key key) {
         this.key = key;
+    }
+
+    public static TraderTradeDemandComponent load(@NotNull FileContext<?> ctx, @NotNull ShopTrader trader, FileElement element){
+        if(!(element instanceof FileObject o)) return null;
+        Key key = ctx.getRegistry().deserializeFromFile(Key.class, o.get("key"));
+        if(key == null) return null;
+        Integer demand = o.getObject(Integer.class, "demand");
+        Integer supply = o.getObject(Integer.class, "supply");
+        if(demand == null || supply == null) return null;
+        TraderTradeDemandComponent data = new TraderTradeDemandComponent(key);
+        data.setSupply(supply);
+        data.setDemand(demand);
+        return data;
+    }
+
+    @Nullable
+    @Override
+    public FileElement save(@NotNull FileContext<?> ctx, @NotNull ShopTrader trader, @NotNull TraderTrade trade) {
+        return new FileObject()
+            .add("key", ctx.getRegistry().serializeToFile(key))
+            .addProperty("demand", demand)
+            .addProperty("supply", supply)
+            ;
     }
 
     public ShopTrade adjustTrade(TraderTrade traderTrade, ShopTrade trade, ShopTraderDemandComponent.TradeModifier modifier){

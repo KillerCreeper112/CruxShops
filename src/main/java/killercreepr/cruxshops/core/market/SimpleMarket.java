@@ -10,7 +10,6 @@ import killercreepr.cruxmenus.api.menu.Menu;
 import killercreepr.cruxmenus.core.registries.Menus;
 import killercreepr.cruxshops.api.market.Market;
 import killercreepr.cruxshops.api.trader.ShopTrader;
-import killercreepr.cruxshops.core.CruxShopsPlugin;
 import killercreepr.cruxshops.core.menu.ShopTraderMenu;
 import net.kyori.adventure.key.Key;
 import org.bukkit.plugin.Plugin;
@@ -123,7 +122,7 @@ public class SimpleMarket extends SimpleStatutable implements Market, Loadable {
     @Override
     public void tick() {
         tick += TICK_DELAY;
-        if(shouldRestock()){
+        /*if(shouldRestock()){
             CruxShopsPlugin.inst().log("Restocking ShopTraders...");
             restock();
             updateMenus();
@@ -132,7 +131,7 @@ public class SimpleMarket extends SimpleStatutable implements Market, Loadable {
         if(shouldReduceDemand()){
             CruxShopsPlugin.inst().log("Reducing demands ShopTraders...");
             reduceDemand();
-        }
+        }*/
 
         for(ShopTrader merchant : merchants){
             if(!(merchant instanceof TickedTime time)) continue;
@@ -171,6 +170,7 @@ public class SimpleMarket extends SimpleStatutable implements Market, Loadable {
     @Override
     public void started() {
         super.started();
+        load();
         runnable = new BukkitRunnable(){
             @Override
             public void run() {
@@ -187,6 +187,7 @@ public class SimpleMarket extends SimpleStatutable implements Market, Loadable {
     @Override
     public void stopped() {
         super.stopped();
+        save();
         if(runnable != null){
             runnable.cancel();
             runnable = null;
@@ -197,8 +198,6 @@ public class SimpleMarket extends SimpleStatutable implements Market, Loadable {
     public void save(@NotNull Plugin plugin) {
         CruxJson cfg = new CruxJson(plugin, "data/market");
         cfg.serialize("tick", tick);
-        cfg.serialize("current_restock_time", currentRestockTime);
-        cfg.serialize("current_reduce_demand_time", currentReduceDemandTime);
         cfg.save();
     }
 
@@ -206,8 +205,6 @@ public class SimpleMarket extends SimpleStatutable implements Market, Loadable {
     public void load(@NotNull Plugin plugin) {
         CruxJson cfg = new CruxJson(plugin, "data/market");
         tick = cfg.deserializeOrDefault("tick", Integer.class, 0);
-        currentRestockTime = cfg.deserializeOrDefault("current_restock_time", Integer.class, 0);
-        currentReduceDemandTime = cfg.deserializeOrDefault("current_reduce_demand_time", Integer.class, 0);
         cfg.close();
     }
 

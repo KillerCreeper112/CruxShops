@@ -2,9 +2,16 @@ package killercreepr.cruxshops.core.trader;
 
 import killercreepr.crux.api.component.DataComponentHandler;
 import killercreepr.crux.api.component.TypedDataComponent;
+import killercreepr.crux.api.data.PluginLoadable;
 import killercreepr.crux.api.data.tick.TickedTime;
 import killercreepr.crux.api.text.tags.container.MergedTagContainer;
 import killercreepr.crux.api.text.tags.container.TagContainer;
+import killercreepr.crux.core.util.CruxKey;
+import killercreepr.cruxconfig.config.bukkit.file.BukkitDataFile;
+import killercreepr.cruxconfig.config.bukkit.file.CruxFolder;
+import killercreepr.cruxconfig.config.common.FileContext;
+import killercreepr.cruxconfig.config.common.element.FileObject;
+import killercreepr.cruxconfig.config.common.file.DataFile;
 import killercreepr.cruxshops.api.component.ShopTraderComponent;
 import killercreepr.cruxshops.api.event.EntityPurchaseTraderTradeEvent;
 import killercreepr.cruxshops.api.profession.TraderProfession;
@@ -14,6 +21,7 @@ import killercreepr.cruxshops.api.trader.ShopTrader;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import org.bukkit.entity.Entity;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,7 +29,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class SimpleShopTrader extends DataComponentHandler.Simple implements ShopTrader, Keyed, TickedTime {
+public class SimpleShopTrader extends DataComponentHandler.Simple implements ShopTrader, Keyed, TickedTime, PluginLoadable {
     protected final Key key;
     protected final TraderProfession profession;
     protected List<TraderTrade> trades = new ArrayList<>();
@@ -143,6 +151,51 @@ public class SimpleShopTrader extends DataComponentHandler.Simple implements Sho
 
     @Override
     public void tick(int tick, int delay) {
+        forEach(typed ->{
+            if(!(typed.getValue() instanceof TickedTime ticked)) return;
+            ticked.tick(tick, delay);
+        });
+    }
 
+    public DataFile getDataFile(Plugin plugin, boolean createIfNeeded){
+        return BukkitDataFile.parseFromGeneralPath(
+            new CruxFolder(plugin, "data/shop/" + CruxKey.toFileName(key) + ".json").file(),
+            createIfNeeded
+        );
+    }
+
+    @Override
+    public void save(@NotNull Plugin plugin) {
+        DataFile file = getDataFile(plugin, true);
+        if(file == null) return;
+        FileContext<?> ctx = new FileContext<>(file.fileRegistry());
+
+        FileObject save = new FileObject();
+        forEach(typed ->{
+            if(!(typed.getValue() instanceof ShopTraderComponent data)) return;
+            data.save(ctx, save, this);
+        });
+        if(save.isEmpty()){
+            file.delete();
+        }else{
+            file.serialize("data", save);
+            file.save();
+        }
+    }
+
+    @Override
+    public void load(@NotNull Plugin plugin) {
+        DataFile file = getDataFile(plugin, false);
+        if(file == null) return;
+        if(!(file.getElement("data") instanceof FileObject o)){
+            file.close();
+            return;
+        }
+        file.close();
+        FileContext<?> ctx = new FileContext<>(file.fileRegistry());
+        forEach(typed ->{
+            if(!(typed.getValue() instanceof ShopTraderComponent data)) return;
+            data.load(ctx, o, this);
+        });
     }
 }

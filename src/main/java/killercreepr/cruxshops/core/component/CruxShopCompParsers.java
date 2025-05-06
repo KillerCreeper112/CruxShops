@@ -22,6 +22,10 @@ public class CruxShopCompParsers {
             .field("selling_modifier", TextInputField.field(DEMAND_TRADE_MODIFIER, ShopTraderDemandComponent::getSellingModifier))
             .apply(ctx ->{
                 return new ShopTraderDemandComponent(
+                    ctx.getOptional("demand_tick"),
+                    ctx.getOptional("demand_change"),
+                    ctx.getOptional("supply_change"),
+
                     ctx.getOptional("buying_modifier"),
                     ctx.getOptional("selling_modifier")
                 );

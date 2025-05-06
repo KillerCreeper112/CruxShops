@@ -1,5 +1,9 @@
 package killercreepr.cruxshops.core.component;
 
+import killercreepr.crux.api.valueproviders.number.NumberProvider;
+import killercreepr.cruxconfig.config.common.FileContext;
+import killercreepr.cruxconfig.config.common.element.FileArray;
+import killercreepr.cruxconfig.config.common.element.FileObject;
 import killercreepr.cruxshops.api.component.ShopTraderComponent;
 import killercreepr.cruxshops.api.data.OriginalHolder;
 import killercreepr.cruxshops.api.shop.trade.ShopTrade;
@@ -12,12 +16,48 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ShopTraderDemandComponent implements ShopTraderComponent {
+    protected final @Nullable NumberProvider demandTick;
+    protected final @Nullable NumberProvider demandChange;
+    protected final @Nullable NumberProvider supplyChange;
     protected final @Nullable TradeModifier buyingModifier;
     protected final @Nullable TradeModifier sellingModifier;
 
-    public ShopTraderDemandComponent(@Nullable TradeModifier buyingModifier, @Nullable TradeModifier sellingModifier) {
+    public ShopTraderDemandComponent(@Nullable NumberProvider demandTick, @Nullable NumberProvider demandChange,
+                                     @Nullable NumberProvider supplyChange, @Nullable TradeModifier buyingModifier, @Nullable TradeModifier sellingModifier) {
+        this.demandTick = demandTick;
+        this.demandChange = demandChange;
+        this.supplyChange = supplyChange;
         this.buyingModifier = buyingModifier;
         this.sellingModifier = sellingModifier;
+    }
+
+    @Override
+    public void load(@NotNull FileContext<?> ctx, @NotNull FileObject object, @NotNull ShopTrader trader){
+        if(!(object.get("trader_demand") instanceof FileArray a)) return;
+        a.forEach(ele ->{
+            var loaded = TraderTradeDemandComponent.load(ctx, trader, ele);
+            if(loaded == null) return;
+            trader.getProfession().getAllTrades().forEach(traderTrade ->{
+                var data = traderTrade.get(CruxShopsComponents.TRADER_TRADE_DEMAND);
+                if(data==null) return;
+                if(!data.key().equals(loaded.key())) return;
+                data.setDemand(loaded.getDemand());
+                data.setSupply(loaded.getSupply());
+            });
+        });
+    }
+
+    @Override
+    public void save(@NotNull FileContext<?> ctx, @NotNull FileObject object, @NotNull ShopTrader trader){
+        FileArray a = new FileArray(trader.getProfession().getAllTrades().size());
+        trader.getProfession().getAllTrades().forEach(trade ->{
+            var data = trade.get(CruxShopsComponents.TRADER_TRADE_DEMAND);
+            if(data==null) return;
+            var saved = data.save(ctx, trader, trade);
+            if(saved==null) return;
+            a.add(saved);
+        });
+        object.add("trader_demand", a);
     }
 
     @Override
