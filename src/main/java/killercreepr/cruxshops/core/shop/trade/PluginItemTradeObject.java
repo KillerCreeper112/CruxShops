@@ -43,6 +43,7 @@ public abstract class PluginItemTradeObject implements ShopTradeObject {
     @NotNull
     public ItemStack buildIcon() {
         var item = item();
+        item.editMeta(meta -> meta.setMaxStackSize(99));
         item.setAmount(CruxMath.clamp(
             amount, 1, CruxItem.getMaxStackSize(item)
         ));

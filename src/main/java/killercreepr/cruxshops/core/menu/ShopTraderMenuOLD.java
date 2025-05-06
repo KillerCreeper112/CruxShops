@@ -12,7 +12,6 @@ import killercreepr.crux.api.text.tags.container.TagContainer;
 import killercreepr.crux.core.Crux;
 import killercreepr.crux.core.data.util.Pair;
 import killercreepr.crux.core.text.resolver.Tag;
-import killercreepr.crux.core.util.CruxColor;
 import killercreepr.crux.core.util.CruxMath;
 import killercreepr.cruxmenus.api.menu.holder.MenuHolder;
 import killercreepr.cruxmenus.api.menu.slot.Slot;
@@ -25,7 +24,6 @@ import killercreepr.cruxshops.api.shop.trade.TraderTrade;
 import killercreepr.cruxshops.api.trader.ShopTrader;
 import killercreepr.cruxshops.core.CruxShopsPlugin;
 import killercreepr.cruxshops.core.config.Config;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
@@ -42,13 +40,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-public class ShopTraderMenu extends ConfigMenu {
+@Deprecated
+public class ShopTraderMenuOLD extends ConfigMenu {
     protected final @NotNull ShopTrader trader;
-    public ShopTraderMenu(@NotNull MenuHolder holder, @NotNull DataExchange info) {
+    public ShopTraderMenuOLD(@NotNull MenuHolder holder, @NotNull DataExchange info) {
         this(holder, info, null);
     }
 
-    public ShopTraderMenu(@NotNull MenuHolder holder, @NotNull DataExchange info, @Nullable MergedTagContainer tags) {
+    public ShopTraderMenuOLD(@NotNull MenuHolder holder, @NotNull DataExchange info, @Nullable MergedTagContainer tags) {
         super(holder, info, tags);
         this.trader = info.getWithDefault("trader", ShopTrader.class, i -> i.getOrThrow(ShopTrader.class));
     }
@@ -83,10 +82,10 @@ public class ShopTraderMenu extends ConfigMenu {
     }
 
     protected final int[] backPageIndexes = new int[]{
-        38, 39
+        9, 17, 18, 26
     };
     protected final int[] nextPageIndexes = new int[]{
-        41, 42
+        27, 35, 36, 44
     };
     public Slot buildBackSlot(int index){
         return new SimpleFixedSlot(this, index){
@@ -162,19 +161,17 @@ public class ShopTraderMenu extends ConfigMenu {
                 symbol = "<red>" + symbol + "</red>";
             }
 
-            if(index == 1){//<crux_space:-146><font:"crux:shop">
-                builder.append("<cruxshop/trade/start>")
+            if(index == 1){
+                builder.append("<crux_space:-146><font:\"crux:shop\">")
                     .append(symbol);
                 continue;
             }
-            MergedTagContainer tags = TagContainer.merged().add(Tag.parsed("index", index + ""));
             String space;
-            if((index-1) % 7 == 0){
+            if(index % 2 == 0){
                 space = "<cruxshop/trade/2>";
             }else{
                 space = "<cruxshop/trade/else>";
             }
-            space = Crux.format().deserializeString(space, tags);
 
             builder.append(space).append("<font:\"crux:shop\">")
                 .append(symbol);
@@ -253,9 +250,9 @@ public class ShopTraderMenu extends ConfigMenu {
     }
 
     protected int page = 0;
-    protected final int MAX = 21;
+    protected final int MAX = 12;
     public void openPage(int page){
-        //List<TraderTrade> trades = getTradesInPage(page);
+        List<TraderTrade> trades = getTradesInPage(page);
         for(int i = 0; i < MAX; i++){
             int listIndex = i + (page * MAX);
             if(listIndex >= trades.size()) break;
@@ -314,26 +311,26 @@ public class ShopTraderMenu extends ConfigMenu {
         ShopTrade mainTrade = null;
         ItemStack icon = null;
         var buying = trade.getBuyingTrade();
-        if(buying == null){} //map.put(0, null);
+        if(buying == null) map.put(0, null);
         else{
             mainTrade = buying;
             icon = mainTrade.getResults().getFirst().buildIcon();
             ShopTradeIngredient ingredient = buying.getIngredients().getFirst();
-            //map.put(0, new Pair<>(applyBuyingItem(applyItem(icon, ingredient.buildIcon()), buying, trade), buildBuyingClick(trade)));
+            map.put(0, new Pair<>(applyBuyingItem(applyItem(icon, ingredient.buildIcon()), buying, trade), buildBuyingClick(trade)));
         }
 
         var selling = trade.getSellingTrade();
-        if(selling == null){} //map.put(2, null);
+        if(selling == null) map.put(2, null);
         else{
             if(mainTrade == null){
                 mainTrade = selling;
                 icon = mainTrade.getIngredients().getFirst().buildIcon();
             }
             ShopTradeResult result = selling.getResults().getFirst();
-            //map.put(2, new Pair<>(applySellingItem(applyItem(icon, result.buildIcon()), selling, trade), buildSellingClick(trade)));
+            map.put(2, new Pair<>(applySellingItem(applyItem(icon, result.buildIcon()), selling, trade), buildSellingClick(trade)));
         }
         if(mainTrade != null){
-            map.put(0, new Pair<>(applyResultItem(CruxItem.wrap(icon), selling, trade), buildResultClick(trade)));
+            map.put(1, new Pair<>(applyResultItem(CruxItem.wrap(icon), selling, trade), buildResultClick(trade)));
         }
         return map;
     }
@@ -354,16 +351,7 @@ public class ShopTraderMenu extends ConfigMenu {
     }
 
     public int getStartingInvSlotFromTradeIndex(int index){
-        if(index >= 0 && index <= 6){
-            return 10 + index;
-        }
-        if(index >= 7 && index <= 13){
-            return 19 + (index-7);
-        }
-        if(index >= 14 && index <= 20){
-            return 28 + (index-14);
-        }
-        /*switch (index){
+        switch (index){
             case 0 -> { return 1; }
             case 1 -> { return 5; }
 
@@ -381,8 +369,8 @@ public class ShopTraderMenu extends ConfigMenu {
 
             case 10 -> { return 46; }
             case 11 -> { return 50; }
-        }*/
-        throw new IndexOutOfBoundsException(index + " out of bounds, must be 0-" + MAX);
+        }
+        throw new IndexOutOfBoundsException(index + " out of bounds, must be 0-11");
     }
 
     public void setTrade(int index, TraderTrade trade){
