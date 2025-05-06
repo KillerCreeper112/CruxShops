@@ -2,24 +2,16 @@ package killercreepr.cruxshops.core.menu;
 
 import killercreepr.crux.api.communication.CreateSound;
 import killercreepr.crux.api.data.DataExchange;
-import killercreepr.crux.api.data.Holder;
 import killercreepr.crux.api.item.CruxItem;
-import killercreepr.crux.api.item.dynamic.DynamicItem;
-import killercreepr.crux.api.text.context.TextParserContext;
 import killercreepr.crux.api.text.tags.TagParser;
 import killercreepr.crux.api.text.tags.container.MergedTagContainer;
-import killercreepr.crux.api.text.tags.container.TagContainer;
 import killercreepr.crux.core.Crux;
-import killercreepr.crux.core.data.util.Pair;
 import killercreepr.crux.core.text.resolver.Tag;
-import killercreepr.crux.core.util.CruxMath;
 import killercreepr.cruxmenus.api.menu.holder.MenuHolder;
 import killercreepr.cruxmenus.api.menu.slot.Slot;
 import killercreepr.cruxmenus.core.menu.ConfigMenu;
 import killercreepr.cruxmenus.core.menu.slot.SimpleFixedSlot;
 import killercreepr.cruxshops.api.shop.trade.ShopTrade;
-import killercreepr.cruxshops.api.shop.trade.ShopTradeIngredient;
-import killercreepr.cruxshops.api.shop.trade.ShopTradeResult;
 import killercreepr.cruxshops.api.shop.trade.TraderTrade;
 import killercreepr.cruxshops.api.trader.ShopTrader;
 import killercreepr.cruxshops.core.CruxShopsPlugin;
@@ -33,12 +25,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiConsumer;
 
 public class ShopTraderSelectMenu extends ConfigMenu {
     protected final @NotNull ShopTrader trader;
@@ -78,25 +64,25 @@ public class ShopTraderSelectMenu extends ConfigMenu {
         var trade = this.trade.getBuyingTrade();
         if(trade != null){
             setItem(
-                info().getOrThrow("buy_ingredient_index", Number.class).intValue(), trade.getIngredients().getFirst().buildIcon()
+                holder.info().getOrThrow("buy_ingredient_index", Number.class).intValue(), trade.getIngredients().getFirst().buildIcon()
             );
             setItem(
-                info().getOrThrow("buy_result_index", Number.class).intValue(), trade.getResults().getFirst().buildIcon()
+                holder.info().getOrThrow("buy_result_index", Number.class).intValue(), trade.getResults().getFirst().buildIcon()
             );
         }
         trade = this.trade.getSellingTrade();
         if(trade != null){
             setItem(
-                info().getOrThrow("sell_ingredient_index", Number.class).intValue(), trade.getIngredients().getFirst().buildIcon()
+                holder.info().getOrThrow("sell_ingredient_index", Number.class).intValue(), trade.getIngredients().getFirst().buildIcon()
             );
             setItem(
-                info().getOrThrow("sell_result_index", Number.class).intValue(), trade.getResults().getFirst().buildIcon()
+                holder.info().getOrThrow("sell_result_index", Number.class).intValue(), trade.getResults().getFirst().buildIcon()
             );
         }
     }
 
     public void setupPageButtons(){
-        buildBackSlot(info().getOrThrow("back_index", Number.class).intValue());
+        buildBackSlot(holder.info().getOrThrow("back_index", Number.class).intValue());
     }
 
     public Slot buildBackSlot(int index){
@@ -104,6 +90,11 @@ public class ShopTraderSelectMenu extends ConfigMenu {
             @Override
             public void onClick(@NotNull HumanEntity player, @NotNull InventoryClickEvent event) {
                 if(!(player instanceof Player p)) return;
+
+                ShopTraderMenu backMenu = info().getOrThrow(ShopTraderMenu.class);
+                backMenu.reload();
+                backMenu.open(p);
+
                 CreateSound.sound(Sound.UI_BUTTON_CLICK).playFor(p);
             }
 

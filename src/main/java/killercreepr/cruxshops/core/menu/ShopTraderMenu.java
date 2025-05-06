@@ -12,7 +12,6 @@ import killercreepr.crux.api.text.tags.container.TagContainer;
 import killercreepr.crux.core.Crux;
 import killercreepr.crux.core.data.util.Pair;
 import killercreepr.crux.core.text.resolver.Tag;
-import killercreepr.crux.core.util.CruxColor;
 import killercreepr.crux.core.util.CruxMath;
 import killercreepr.cruxmenus.api.menu.holder.MenuHolder;
 import killercreepr.cruxmenus.api.menu.slot.Slot;
@@ -26,7 +25,6 @@ import killercreepr.cruxshops.api.trader.ShopTrader;
 import killercreepr.cruxshops.core.CruxShopsPlugin;
 import killercreepr.cruxshops.core.config.Config;
 import net.kyori.adventure.key.Key;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
@@ -122,6 +120,12 @@ public class ShopTraderMenu extends ConfigMenu {
         }
     }
 
+    public void reload(){
+        clearItems(true);
+        clearMenuItems(true);
+        load();
+    }
+
     public Slot buildNextSlot(int index){
         return new SimpleFixedSlot(this, index){
             @Override
@@ -130,9 +134,7 @@ public class ShopTraderMenu extends ConfigMenu {
                 int newPage = CruxMath.wrap(page+1, 0, getMaxPage());
                 if(newPage==page) return;
                 page = newPage;
-                clearItems(true);
-                clearMenuItems(true);
-                load();
+                reload();
                 open(p);
                 CreateSound.sound(Sound.UI_BUTTON_CLICK).playFor(p);
             }
@@ -271,7 +273,7 @@ public class ShopTraderMenu extends ConfigMenu {
 
     public BiConsumer<HumanEntity, InventoryClickEvent> buildResultClick(TraderTrade trade){
         return (p, event) ->{
-            Key key = Crux.key(info().getOrThrow("cruxshops/trade_select_menu", String.class));
+            Key key = Crux.key(holder.info().getOrThrow("cruxshops/trade_select_menu", String.class));
             holder.getRegistry().menuHolders().get(key).open(
                 p, DataExchange.builder()
                     .put("trade", trade)
