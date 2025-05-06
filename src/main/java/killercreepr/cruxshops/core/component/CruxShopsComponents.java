@@ -2,6 +2,7 @@ package killercreepr.cruxshops.core.component;
 
 import killercreepr.crux.api.component.DataComponentType;
 import killercreepr.crux.api.component.parser.hybrid.PersistTextParser;
+import killercreepr.crux.api.component.parser.hybrid.TextInputField;
 import killercreepr.crux.core.Crux;
 import killercreepr.crux.core.registries.CruxRegistries;
 
@@ -14,7 +15,8 @@ public class CruxShopsComponents {
 
     public static final DataComponentType<TraderTradeDemandComponent> TRADER_TRADE_DEMAND = register("trader_trade/demand", builder ->
         builder.textParser(PersistTextParser.mapBuilder(TraderTradeDemandComponent.class)
-            .apply(ctx -> new TraderTradeDemandComponent())));
+                .field("key", TextInputField.field(PersistTextParser.KEY, TraderTradeDemandComponent::key))
+            .apply(ctx -> new TraderTradeDemandComponent(ctx.get("key")))));
 
     private static <T> DataComponentType<T> register(String id, UnaryOperator<DataComponentType.Builder<T>> builderOperator){
         return CruxRegistries.DATA_COMPONENT_TYPE.register(Crux.key(id), builderOperator.apply(DataComponentType.builder()).build());

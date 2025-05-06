@@ -3,19 +3,26 @@ package killercreepr.cruxshops.core.component;
 import killercreepr.cruxshops.api.component.TraderTradeComponent;
 import killercreepr.cruxshops.api.data.OriginalHolder;
 import killercreepr.cruxshops.api.shop.trade.*;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.key.Keyed;
 import org.bukkit.Bukkit;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TraderTradeDemandComponent implements TraderTradeComponent {
+public class TraderTradeDemandComponent implements TraderTradeComponent, Keyed {
+    protected final Key key;
     protected int demand;
     protected int supply;
+
+    public TraderTradeDemandComponent(Key key) {
+        this.key = key;
+    }
 
     public ShopTrade adjustTrade(TraderTrade traderTrade, ShopTrade trade, ShopTraderDemandComponent.TradeModifier modifier){
         TradeType type = trade.equals(traderTrade.getSellingTrade()) ? TradeType.SELL : TradeType.BUY;
 
-        Bukkit.broadcastMessage("demand= " + demand + ", supply= " + supply);
         switch (type){
             case BUY -> {
                 List<ShopTradeIngredient> ingredients = new ArrayList<>();
@@ -72,6 +79,12 @@ public class TraderTradeDemandComponent implements TraderTradeComponent {
         return result.withAmount(adjustedAmount);
     }
 
+    @NotNull
+    @Override
+    public Key key() {
+        return key;
+    }
+
     public enum TradeType {
         BUY,
         SELL
@@ -124,7 +137,7 @@ public class TraderTradeDemandComponent implements TraderTradeComponent {
 
     @Override
     public TraderTradeComponent createCopy() {
-        TraderTradeDemandComponent data = new TraderTradeDemandComponent();
+        TraderTradeDemandComponent data = new TraderTradeDemandComponent(key);
         data.setDemand(demand);
         data.setSupply(supply);
         return data;
