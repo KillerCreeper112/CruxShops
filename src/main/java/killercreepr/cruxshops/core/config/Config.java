@@ -13,7 +13,10 @@ import java.io.File;
 public class Config extends Cfg {
     public final CfgValue<DynamicItem> SELLING_ITEM = new CommonValue<>(){};
     public final CfgValue<DynamicItem> BUYING_ITEM = new CommonValue<>(){};
-    public final CfgValue<DynamicItem> RESULT_ITEM = new CommonValue<>(){};
+
+    public final CfgValue<DynamicItem> RESULT_BOTH_ITEM = new CommonValue<>(){};
+    public final CfgValue<DynamicItem> RESULT_BUYING_ITEM = new CommonValue<>(){};
+    public final CfgValue<DynamicItem> RESULT_SELLING_ITEM = new CommonValue<>(){};
 
     public Config(@NotNull Plugin plugin, @NotNull String path) {
         super(plugin, path);

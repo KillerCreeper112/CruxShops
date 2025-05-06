@@ -237,7 +237,7 @@ public class ShopTraderMenuOLD extends ConfigMenu {
 
     public CruxItem applyResultItem(CruxItem item, ShopTrade trade, TraderTrade traderTrade){
         Config cfg = cfg();
-        DynamicItem displayItem = cfg.RESULT_ITEM.value();
+        DynamicItem displayItem = null;//cfg.RESULT_ITEM.value();
         if(displayItem == null) return item;
         MergedTagContainer tags = trader.buildTags(trade);
         if(tags == null) tags = TagContainer.merged();

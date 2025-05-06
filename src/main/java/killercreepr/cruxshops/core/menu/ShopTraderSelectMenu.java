@@ -2,9 +2,13 @@ package killercreepr.cruxshops.core.menu;
 
 import killercreepr.crux.api.communication.CreateSound;
 import killercreepr.crux.api.data.DataExchange;
+import killercreepr.crux.api.data.Holder;
 import killercreepr.crux.api.item.CruxItem;
+import killercreepr.crux.api.item.dynamic.DynamicItem;
+import killercreepr.crux.api.text.context.TextParserContext;
 import killercreepr.crux.api.text.tags.TagParser;
 import killercreepr.crux.api.text.tags.container.MergedTagContainer;
+import killercreepr.crux.api.text.tags.container.TagContainer;
 import killercreepr.crux.core.Crux;
 import killercreepr.crux.core.text.resolver.Tag;
 import killercreepr.cruxmenus.api.menu.holder.MenuHolder;
@@ -12,6 +16,7 @@ import killercreepr.cruxmenus.api.menu.slot.Slot;
 import killercreepr.cruxmenus.core.menu.ConfigMenu;
 import killercreepr.cruxmenus.core.menu.slot.SimpleFixedSlot;
 import killercreepr.cruxshops.api.shop.trade.ShopTrade;
+import killercreepr.cruxshops.api.shop.trade.ShopTradeIngredient;
 import killercreepr.cruxshops.api.shop.trade.TraderTrade;
 import killercreepr.cruxshops.api.trader.ShopTrader;
 import killercreepr.cruxshops.core.CruxShopsPlugin;
@@ -25,6 +30,9 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.function.BiConsumer;
 
 public class ShopTraderSelectMenu extends ConfigMenu {
     protected final @NotNull ShopTrader trader;
@@ -49,6 +57,42 @@ public class ShopTraderSelectMenu extends ConfigMenu {
         ;
         return tags;
     }
+    public BiConsumer<HumanEntity, InventoryClickEvent> buildSellingClick(TraderTrade trade){
+        return purchaseTradeConsumer(trade::getSellingTrade, trade);
+    }
+
+    public BiConsumer<HumanEntity, InventoryClickEvent> buildBuyingClick(TraderTrade trade){
+        return purchaseTradeConsumer(trade::getBuyingTrade, trade);
+    }
+    public BiConsumer<HumanEntity, InventoryClickEvent> purchaseTradeConsumer(Holder<ShopTrade> holder, TraderTrade traderTrade){
+        return (p, event) ->{
+            var t = holder.value();
+            if(t == null) return;
+            if(trader.canPurchaseTrade(p, t) != ShopTrader.CanPurchase.TRUE){
+                return;
+            }
+            /*if(!t.canView(p)){
+                p.sendMessage("Can't view");
+                return;
+            }
+            if(!t.canAfford(p)){
+                p.sendMessage("Can't afford");
+                return;
+            }
+            if(!t.canAccept(p)){
+                p.sendMessage("Can't accept");
+                return;
+            }*/
+
+            if(trader.purchaseTrade(p, traderTrade, t)){
+                clearItems(true);
+                clearMenuItems(true);
+                load();
+                open(p);
+            }
+            p.sendMessage("purchase");
+        };
+    }
 
     @Override
     public void load() {
@@ -60,29 +104,135 @@ public class ShopTraderSelectMenu extends ConfigMenu {
         setupPageButtons();
     }
 
+    public CruxItem applySellingItem(CruxItem item, ShopTrade trade, TraderTrade traderTrade){
+        Config cfg = cfg();
+        DynamicItem displayItem = cfg.SELLING_ITEM.value();
+        if(displayItem == null) return item;
+        MergedTagContainer tags = trader.buildTags(trade);
+        if(tags == null) tags = TagContainer.merged();
+        tags.hook(trade).hook(traderTrade);
+        tags.add(Tag.string("can_use_trade", (args, ctx) ->{
+            var entity = info().getOrThrow("viewer", Entity.class);
+            return canUse(trade, entity) + "";
+        }));
+        return displayItem.applyComponents(item, TextParserContext.builder().tags(tags).build());
+    }
+
+    public CruxItem applyBuyingItem(CruxItem item, ShopTrade trade, TraderTrade traderTrade){
+        Config cfg = cfg();
+        DynamicItem displayItem = cfg.BUYING_ITEM.value();
+        if(displayItem == null) return item;
+        MergedTagContainer tags = trader.buildTags(trade);
+        if(tags == null) tags = TagContainer.merged();
+        tags.hook(trade).hook(traderTrade);
+        tags.add(Tag.string("can_use_trade", (args, ctx) ->{
+            var entity = info().getOrThrow("viewer", Entity.class);
+            return canUse(trade, entity) + "";
+        }));
+        return displayItem.applyComponents(item, TextParserContext.builder().tags(tags).build());
+    }
+
+    public CruxItem applyItem(ItemStack icon, ItemStack ingredient){
+        icon = icon.clone();
+        ItemStack finalIcon = icon;
+        ingredient.editMeta(meta ->{
+            finalIcon.editMeta(iconMeta ->{
+                if(meta.hasItemModel()){
+                    iconMeta.setItemModel(meta.getItemModel());
+                }else iconMeta.setItemModel(null);
+                iconMeta.setMaxStackSize(CruxItem.getMaxStackSize(ingredient));
+            });
+        });
+        icon.setAmount(ingredient.getAmount());
+        return CruxItem.wrap(icon);
+    }
+
     public void setupTrades(){
         var trade = this.trade.getBuyingTrade();
         if(trade != null){
+            var buyTrade = trade;
+            ItemStack icon = trade.getResults().getFirst().buildIcon();
+
+            var click = buildBuyingClick(this.trade);
+            holder.info().getOrThrow("buy_indexes", List.class).forEach(obj ->{
+                setItem(
+                    ((Number) (obj)).intValue(),
+                    applyBuyingItem(applyItem(icon, CruxItem.create(Material.LIGHT_GRAY_STAINED_GLASS_PANE).itemModel(Crux.key("gui/nothing")).item())
+                        .amount(1), buyTrade, this.trade).item(),
+                    new SimpleFixedSlot(this, ((Number) (obj)).intValue()){
+                        @Override
+                        public void onClick(@NotNull HumanEntity p, @NotNull InventoryClickEvent event) {
+                            click.accept(p, event);
+                        }
+                    }
+                );
+            });
+
             setItem(
-                holder.info().getOrThrow("buy_ingredient_index", Number.class).intValue(), trade.getIngredients().getFirst().buildIcon()
+                holder.info().getOrThrow("buy_ingredient_index", Number.class).intValue(),
+                applyBuyingItem(applyItem(icon, trade.getIngredients().getFirst().buildIcon()), trade, this.trade).item(),
+                new SimpleFixedSlot(this, holder.info().getOrThrow("buy_ingredient_index", Number.class).intValue()){
+                    @Override
+                    public void onClick(@NotNull HumanEntity p, @NotNull InventoryClickEvent event) {
+                        click.accept(p, event);
+                    }
+                }
             );
             setItem(
-                holder.info().getOrThrow("buy_result_index", Number.class).intValue(), trade.getResults().getFirst().buildIcon()
+                holder.info().getOrThrow("buy_result_index", Number.class).intValue(),
+                applyBuyingItem(CruxItem.wrap(trade.getResults().getFirst().buildIcon()), trade, this.trade).item(),
+                new SimpleFixedSlot(this, holder.info().getOrThrow("buy_result_index", Number.class).intValue()){
+                    @Override
+                    public void onClick(@NotNull HumanEntity p, @NotNull InventoryClickEvent event) {
+                        click.accept(p, event);
+                    }
+                }
             );
         }
         trade = this.trade.getSellingTrade();
         if(trade != null){
+            ItemStack icon = trade.getIngredients().getFirst().buildIcon();
+            var sellTrade = trade;
+            var click = buildSellingClick(this.trade);
+            holder.info().getOrThrow("sell_indexes", List.class).forEach(obj ->{
+                setItem(
+                    ((Number) (obj)).intValue(),
+                    applySellingItem(applyItem(icon, CruxItem.create(Material.LIGHT_GRAY_STAINED_GLASS_PANE).itemModel(Crux.key("gui/nothing")).item()).amount(1),
+                        sellTrade, this.trade).item(),
+                    new SimpleFixedSlot(this, ((Number) (obj)).intValue()){
+                        @Override
+                        public void onClick(@NotNull HumanEntity p, @NotNull InventoryClickEvent event) {
+                            click.accept(p, event);
+                        }
+                    }
+                );
+            });
+
             setItem(
-                holder.info().getOrThrow("sell_ingredient_index", Number.class).intValue(), trade.getIngredients().getFirst().buildIcon()
+                holder.info().getOrThrow("sell_ingredient_index", Number.class).intValue(),
+                applySellingItem(CruxItem.wrap(trade.getIngredients().getFirst().buildIcon()), trade, this.trade).item(),
+                new SimpleFixedSlot(this, holder.info().getOrThrow("sell_ingredient_index", Number.class).intValue()){
+                    @Override
+                    public void onClick(@NotNull HumanEntity p, @NotNull InventoryClickEvent event) {
+                        click.accept(p, event);
+                    }
+                }
             );
             setItem(
-                holder.info().getOrThrow("sell_result_index", Number.class).intValue(), trade.getResults().getFirst().buildIcon()
+                holder.info().getOrThrow("sell_result_index", Number.class).intValue(),
+                applySellingItem(applyItem(icon, trade.getResults().getFirst().buildIcon()), trade, this.trade).item(),
+                new SimpleFixedSlot(this, holder.info().getOrThrow("sell_result_index", Number.class).intValue()){
+                    @Override
+                    public void onClick(@NotNull HumanEntity p, @NotNull InventoryClickEvent event) {
+                        click.accept(p, event);
+                    }
+                }
             );
         }
     }
 
     public void setupPageButtons(){
-        buildBackSlot(holder.info().getOrThrow("back_index", Number.class).intValue());
+        addSlot(buildBackSlot(holder.info().getOrThrow("back_index", Number.class).intValue()), true);
     }
 
     public Slot buildBackSlot(int index){

@@ -215,7 +215,7 @@ public class ShopTraderMenu extends ConfigMenu {
 
     public CruxItem applySellingItem(CruxItem item, ShopTrade trade, TraderTrade traderTrade){
         Config cfg = cfg();
-        DynamicItem displayItem = cfg.SELLING_ITEM.value();
+        DynamicItem displayItem = cfg.RESULT_SELLING_ITEM.value();
         if(displayItem == null) return item;
         MergedTagContainer tags = trader.buildTags(trade);
         if(tags == null) tags = TagContainer.merged();
@@ -229,7 +229,14 @@ public class ShopTraderMenu extends ConfigMenu {
 
     public CruxItem applyBuyingItem(CruxItem item, ShopTrade trade, TraderTrade traderTrade){
         Config cfg = cfg();
-        DynamicItem displayItem = cfg.BUYING_ITEM.value();
+        DynamicItem displayItem;
+        if(traderTrade.getBuyingTrade() != null && traderTrade.getSellingTrade() != null){
+            displayItem = cfg.RESULT_BOTH_ITEM.value();
+        }else if(traderTrade.getBuyingTrade() != null){
+            displayItem = cfg.RESULT_BUYING_ITEM.value();
+        }else{
+            displayItem = cfg.RESULT_SELLING_ITEM.value();
+        }
         if(displayItem == null) return item;
         MergedTagContainer tags = trader.buildTags(trade);
         if(tags == null) tags = TagContainer.merged();
@@ -241,7 +248,7 @@ public class ShopTraderMenu extends ConfigMenu {
         return displayItem.applyComponents(item, TextParserContext.builder().tags(tags).build());
     }
 
-    public CruxItem applyResultItem(CruxItem item, ShopTrade trade, TraderTrade traderTrade){
+    /*public CruxItem applyResultItem(CruxItem item, ShopTrade trade, TraderTrade traderTrade){
         Config cfg = cfg();
         DynamicItem displayItem = cfg.RESULT_ITEM.value();
         if(displayItem == null) return item;
@@ -253,7 +260,7 @@ public class ShopTraderMenu extends ConfigMenu {
             return canUse(trade, entity) + "";
         }));
         return displayItem.applyComponents(item, TextParserContext.builder().tags(tags).build());
-    }
+    }*/
 
     protected int page = 0;
     protected final int MAX = 21;
@@ -268,7 +275,7 @@ public class ShopTraderMenu extends ConfigMenu {
     }
 
     public BiConsumer<HumanEntity, InventoryClickEvent> buildBuyingClick(TraderTrade trade){
-        return purchaseTradeConsumer(trade::getBuyingTrade, trade);
+        return buildResultClick(trade);//purchaseTradeConsumer(trade::getBuyingTrade, trade);
     }
 
     public BiConsumer<HumanEntity, InventoryClickEvent> buildResultClick(TraderTrade trade){
@@ -276,6 +283,7 @@ public class ShopTraderMenu extends ConfigMenu {
             Key key = Crux.key(holder.info().getOrThrow("cruxshops/trade_select_menu", String.class));
             holder.getRegistry().menuHolders().get(key).open(
                 p, DataExchange.builder()
+                    .put(this)
                     .put("trade", trade)
                     .put("trader", trader)
                     .build()
@@ -315,35 +323,21 @@ public class ShopTraderMenu extends ConfigMenu {
     }
 
     public BiConsumer<HumanEntity, InventoryClickEvent> buildSellingClick(TraderTrade trade){
-        return purchaseTradeConsumer(trade::getSellingTrade, trade);
+        return  buildResultClick(trade);//purchaseTradeConsumer(trade::getSellingTrade, trade);
     }
 
     public Map<Integer, Pair<CruxItem, BiConsumer<HumanEntity, InventoryClickEvent>>> buildTradeItems(TraderTrade trade){
         Map<Integer, Pair<CruxItem, BiConsumer<HumanEntity, InventoryClickEvent>>> map = new HashMap<>();
         //0, 1, 2
-        ShopTrade mainTrade = null;
-        ItemStack icon = null;
         var buying = trade.getBuyingTrade();
-        if(buying == null){} //map.put(0, null);
-        else{
-            mainTrade = buying;
-            icon = mainTrade.getResults().getFirst().buildIcon();
-            ShopTradeIngredient ingredient = buying.getIngredients().getFirst();
-            //map.put(0, new Pair<>(applyBuyingItem(applyItem(icon, ingredient.buildIcon()), buying, trade), buildBuyingClick(trade)));
+        if(buying != null){
+            map.put(0, new Pair<>(applyBuyingItem(CruxItem.wrap(buying.getResults().getFirst().buildIcon()), buying, trade), buildBuyingClick(trade)));
+            return map;
         }
 
         var selling = trade.getSellingTrade();
-        if(selling == null){} //map.put(2, null);
-        else{
-            if(mainTrade == null){
-                mainTrade = selling;
-                icon = mainTrade.getIngredients().getFirst().buildIcon();
-            }
-            ShopTradeResult result = selling.getResults().getFirst();
-            //map.put(2, new Pair<>(applySellingItem(applyItem(icon, result.buildIcon()), selling, trade), buildSellingClick(trade)));
-        }
-        if(mainTrade != null){
-            map.put(0, new Pair<>(applyResultItem(CruxItem.wrap(icon), selling, trade), buildResultClick(trade)));
+        if(selling != null){
+            map.put(0, new Pair<>(applySellingItem(CruxItem.wrap(selling.getIngredients().getFirst().buildIcon()), selling, trade), buildSellingClick(trade)));
         }
         return map;
     }

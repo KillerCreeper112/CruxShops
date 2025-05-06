@@ -2,7 +2,7 @@ package killercreepr.cruxshops.core.text.tags.object;
 
 import killercreepr.crux.api.component.DataComponentType;
 import killercreepr.crux.api.text.format.FormatPrefix;
-import killercreepr.crux.api.text.hook.ObjectTag;
+import killercreepr.crux.api.text.hook.SimpleObjectTag;
 import killercreepr.crux.api.text.resolver.StringResolver;
 import killercreepr.crux.api.text.tags.TagParser;
 import killercreepr.crux.api.text.tags.container.TagContainer;
@@ -13,7 +13,10 @@ import killercreepr.cruxshops.api.shop.trade.TraderTrade;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class TraderTradeTags implements ObjectTag<TraderTrade> {
+import java.util.HashMap;
+import java.util.Map;
+
+public class TraderTradeTags implements SimpleObjectTag<TraderTrade> {
     @NotNull
     @Override
     public Class<TraderTrade> getObjectType() {
@@ -35,5 +38,17 @@ public class TraderTradeTags implements ObjectTag<TraderTrade> {
                 return object.has(type) + "";
             }))
             ;
+    }
+
+    @Override
+    public @Nullable Map<Object, FormatPrefix> hookObjects(TraderTrade object) {
+        Map<Object, FormatPrefix> map = new HashMap<>();
+        if(object.getBuyingTrade() != null){
+            map.put(object.getBuyingTrade(), FormatPrefix.simple("buying/"));
+        }
+        if(object.getSellingTrade() != null){
+            map.put(object.getSellingTrade(), FormatPrefix.simple("selling/"));
+        }
+        return map;
     }
 }
