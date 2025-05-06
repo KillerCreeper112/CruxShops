@@ -16,7 +16,6 @@ import killercreepr.cruxmenus.api.menu.slot.Slot;
 import killercreepr.cruxmenus.core.menu.ConfigMenu;
 import killercreepr.cruxmenus.core.menu.slot.SimpleFixedSlot;
 import killercreepr.cruxshops.api.shop.trade.ShopTrade;
-import killercreepr.cruxshops.api.shop.trade.ShopTradeIngredient;
 import killercreepr.cruxshops.api.shop.trade.TraderTrade;
 import killercreepr.cruxshops.api.trader.ShopTrader;
 import killercreepr.cruxshops.core.CruxShopsPlugin;
