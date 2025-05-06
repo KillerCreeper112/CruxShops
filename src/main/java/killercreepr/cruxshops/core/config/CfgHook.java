@@ -94,6 +94,9 @@ public class CfgHook {
                                 }
                             };
                         }
+                        case "simple_select" ->{
+
+                        }
                     }
                     return current;
                 }
