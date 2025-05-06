@@ -11,6 +11,7 @@ import killercreepr.crux.api.text.tags.container.MergedTagContainer;
 import killercreepr.crux.api.text.tags.container.TagContainer;
 import killercreepr.crux.core.Crux;
 import killercreepr.crux.core.text.resolver.Tag;
+import killercreepr.crux.core.util.CruxMath;
 import killercreepr.cruxmenus.api.menu.holder.MenuHolder;
 import killercreepr.cruxmenus.api.menu.slot.Slot;
 import killercreepr.cruxmenus.core.menu.ConfigMenu;
@@ -21,13 +22,18 @@ import killercreepr.cruxshops.api.shop.trade.TraderTrade;
 import killercreepr.cruxshops.api.trader.ShopTrader;
 import killercreepr.cruxshops.core.CruxShopsPlugin;
 import killercreepr.cruxshops.core.config.Config;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.ItemRarity;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -98,6 +104,36 @@ public class ShopTraderSelectMenu extends ConfigMenu {
         load();
     }
 
+    public CruxItem applyName(CruxItem item, int amount){
+        if(amount <= CruxItem.getMaxStackSize(item.item())) return item;
+        item.editMeta(meta ->{
+
+            ItemRarity rarity = meta.hasRarity() ? meta.getRarity() : ItemRarity.COMMON;
+            meta.displayName(
+                Component.empty()
+                    .decoration(TextDecoration.ITALIC, false)
+                    .append(
+                        Component.empty().color(rarity.color())
+                            .append(
+                                getName(item.item())
+                            )
+                    )
+                    .append(
+                        Component.text(" x" + CruxMath.format(amount))
+                            .color(NamedTextColor.WHITE)
+                    )
+            );
+        });
+        return item;
+    }
+
+    public Component getName(ItemStack item){
+        ItemMeta meta = item.getItemMeta();
+        if(meta.hasDisplayName()) return meta.displayName();
+        if(meta.hasItemName()) return meta.itemName();
+        return Component.translatable(item.getType());
+    }
+
     @Override
     public void load() {
         var viewer = info().getOrThrow("viewer", Entity.class);
@@ -112,6 +148,7 @@ public class ShopTraderSelectMenu extends ConfigMenu {
     public CruxItem applySellingItem(CruxItem item, ShopTrade trade, TraderTrade traderTrade){
         Config cfg = cfg();
         DynamicItem displayItem = cfg.SELLING_ITEM.value();
+        applyName(item, trade.getIngredients().getFirst().getAmount());
         if(displayItem == null) return item;
         MergedTagContainer tags = trader.buildTags(trade);
         if(tags == null) tags = TagContainer.merged();
@@ -126,6 +163,7 @@ public class ShopTraderSelectMenu extends ConfigMenu {
     public CruxItem applyBuyingItem(CruxItem item, ShopTrade trade, TraderTrade traderTrade){
         Config cfg = cfg();
         DynamicItem displayItem = cfg.BUYING_ITEM.value();
+        applyName(item, trade.getResults().getFirst().getAmount());
         if(displayItem == null) return item;
         MergedTagContainer tags = trader.buildTags(trade);
         if(tags == null) tags = TagContainer.merged();

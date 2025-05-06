@@ -56,6 +56,14 @@ public class CruxShopsPlugin extends CruxPlugin implements Listener, LangProvide
 
     protected Market globalMarket;
 
+    public Market getGlobalMarket() {
+        return globalMarket;
+    }
+
+    public void setGlobalMarket(Market globalMarket) {
+        this.globalMarket = globalMarket;
+    }
+
     @Override
     public void onLoad() {
         instance = this;

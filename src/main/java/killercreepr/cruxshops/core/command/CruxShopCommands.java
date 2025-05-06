@@ -1,5 +1,6 @@
 package killercreepr.cruxshops.core.command;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -14,6 +15,7 @@ import killercreepr.cruxcore.CruxCore;
 import killercreepr.cruxshops.api.trader.ShopTrader;
 import killercreepr.cruxshops.core.CruxShopsPlugin;
 import killercreepr.cruxshops.core.command.argument.ShopArguments;
+import killercreepr.cruxshops.core.market.SimpleMarket;
 import net.kyori.adventure.key.Key;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -78,6 +80,22 @@ public class CruxShopCommands {
                                         })
                                 )
                         )
+                )
+        ).then(
+            Commands.literal("tick")
+                .then(
+                    Commands.argument("step", IntegerArgumentType.integer())
+                        .executes(ctx ->{
+                            var sender = getExecutor(ctx.getSource());
+                            var market = plugin.getGlobalMarket();
+                            if(!(market instanceof SimpleMarket m)) return -1;
+                            int step = ctx.getArgument("step", Integer.class);
+                            for(int i = 0; i < step; i++){
+                                m.tick();
+                            }
+                            sender.sendMessage("Ticked market " + step + " times");
+                            return 1;
+                        })
                 )
         )
         ;

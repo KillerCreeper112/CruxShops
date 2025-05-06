@@ -145,12 +145,6 @@ public class ShopTraderDemandComponent implements ShopTraderComponent {
         trader.getProfession().getAllTrades().forEach(trade ->{
             var data = trade.get(CruxShopsComponents.TRADER_TRADE_DEMAND);
             if(data==null) return;
-            if(demandAdd != null){
-                data.addDemand(demandAdd.value().intValue());
-            }
-            if(supplyAdd != null){
-                data.addSupply(supplyAdd.value().intValue());
-            }
             if(demandMultiplier != null){
                 data.setDemand(
                     (int) (data.getDemand() * demandMultiplier.value().floatValue())
@@ -160,6 +154,12 @@ public class ShopTraderDemandComponent implements ShopTraderComponent {
                 data.setSupply(
                     (int) (data.getSupply() * supplyMultiplier.value().floatValue())
                 );
+            }
+            if(demandAdd != null){
+                data.addDemand(demandAdd.value().intValue());
+            }
+            if(supplyAdd != null){
+                data.addSupply(supplyAdd.value().intValue());
             }
         });
     }
