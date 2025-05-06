@@ -13,10 +13,12 @@ import killercreepr.crux.core.Crux;
 import killercreepr.crux.core.data.util.Pair;
 import killercreepr.crux.core.text.resolver.Tag;
 import killercreepr.crux.core.util.CruxMath;
+import killercreepr.cruxmenus.api.menu.Menu;
 import killercreepr.cruxmenus.api.menu.holder.MenuHolder;
 import killercreepr.cruxmenus.api.menu.slot.Slot;
 import killercreepr.cruxmenus.core.menu.ConfigMenu;
 import killercreepr.cruxmenus.core.menu.slot.SimpleFixedSlot;
+import killercreepr.cruxmenus.core.registries.Menus;
 import killercreepr.cruxshops.api.shop.trade.ShopTrade;
 import killercreepr.cruxshops.api.shop.trade.TraderTrade;
 import killercreepr.cruxshops.api.trader.ShopTrader;
@@ -33,13 +35,28 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 public class ShopTraderMenu extends ConfigMenu {
+    public static void updateMenus(){
+        for(var entry : new HashSet<>(Menus.OPENED.entrySet())){
+            Menu menu = entry.getValue();
+            if(menu instanceof ShopTraderMenu m){
+                m.reload();
+                Player p = Crux.getServer().getPlayer(entry.getKey());
+                if(p != null) m.open(p);
+                continue;
+            }
+            if(menu instanceof ShopTraderSelectMenu m){
+                m.reload();
+                Player p = Crux.getServer().getPlayer(entry.getKey());
+                if(p != null) m.open(p);
+                continue;
+            }
+        }
+    }
+
     protected final @NotNull ShopTrader trader;
     public ShopTraderMenu(@NotNull MenuHolder holder, @NotNull DataExchange info) {
         this(holder, info, null);

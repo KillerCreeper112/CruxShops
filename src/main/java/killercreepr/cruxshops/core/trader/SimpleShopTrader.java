@@ -152,8 +152,8 @@ public class SimpleShopTrader extends DataComponentHandler.Simple implements Sho
     @Override
     public void tick(int tick, int delay) {
         forEach(typed ->{
-            if(!(typed.getValue() instanceof TickedTime ticked)) return;
-            ticked.tick(tick, delay);
+            if(!(typed.getValue() instanceof ShopTraderComponent ticked)) return;
+            ticked.tick(tick, delay, this);
         });
     }
 

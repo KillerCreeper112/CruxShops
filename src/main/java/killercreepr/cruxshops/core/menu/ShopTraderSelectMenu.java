@@ -85,13 +85,17 @@ public class ShopTraderSelectMenu extends ConfigMenu {
             }*/
 
             if(trader.purchaseTrade(p, trade, t)){
-                clearItems(true);
-                clearMenuItems(true);
-                load();
+                reload();
                 open(p);
             }
             p.sendMessage("purchase");
         };
+    }
+
+    public void reload(){
+        clearItems(true);
+        clearMenuItems(true);
+        load();
     }
 
     @Override

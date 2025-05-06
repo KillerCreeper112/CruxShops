@@ -23,4 +23,7 @@ public interface ShopTraderComponent {
     }
     default void load(@NotNull FileContext<?> ctx, @NotNull FileObject object, @NotNull ShopTrader trader){
     }
+    default void tick(int tick, int delay, @NotNull ShopTrader trader){
+
+    }
 }

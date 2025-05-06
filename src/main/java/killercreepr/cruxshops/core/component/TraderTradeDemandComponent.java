@@ -1,7 +1,5 @@
 package killercreepr.cruxshops.core.component;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import killercreepr.cruxconfig.config.common.FileContext;
 import killercreepr.cruxconfig.config.common.element.FileElement;
 import killercreepr.cruxconfig.config.common.element.FileObject;

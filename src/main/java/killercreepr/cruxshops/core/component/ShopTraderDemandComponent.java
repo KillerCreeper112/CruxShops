@@ -17,18 +17,47 @@ import org.jetbrains.annotations.Nullable;
 
 public class ShopTraderDemandComponent implements ShopTraderComponent {
     protected final @Nullable NumberProvider demandTick;
-    protected final @Nullable NumberProvider demandChange;
-    protected final @Nullable NumberProvider supplyChange;
+    protected final @Nullable NumberProvider demandAdd;
+    protected final @Nullable NumberProvider supplyAdd;
+    protected final @Nullable NumberProvider demandMultiplier;
+    protected final @Nullable NumberProvider supplyMultiplier;
     protected final @Nullable TradeModifier buyingModifier;
     protected final @Nullable TradeModifier sellingModifier;
 
-    public ShopTraderDemandComponent(@Nullable NumberProvider demandTick, @Nullable NumberProvider demandChange,
-                                     @Nullable NumberProvider supplyChange, @Nullable TradeModifier buyingModifier, @Nullable TradeModifier sellingModifier) {
+    public ShopTraderDemandComponent(@Nullable NumberProvider demandTick, @Nullable NumberProvider demandAdd, @Nullable NumberProvider supplyAdd, @Nullable NumberProvider demandMultiplier, @Nullable NumberProvider supplyMultiplier, @Nullable TradeModifier buyingModifier, @Nullable TradeModifier sellingModifier) {
         this.demandTick = demandTick;
-        this.demandChange = demandChange;
-        this.supplyChange = supplyChange;
+        this.demandAdd = demandAdd;
+        this.supplyAdd = supplyAdd;
+        this.demandMultiplier = demandMultiplier;
+        this.supplyMultiplier = supplyMultiplier;
         this.buyingModifier = buyingModifier;
         this.sellingModifier = sellingModifier;
+    }
+
+
+    @Nullable
+    public NumberProvider getDemandTick() {
+        return demandTick;
+    }
+
+    @Nullable
+    public NumberProvider getDemandAdd() {
+        return demandAdd;
+    }
+
+    @Nullable
+    public NumberProvider getSupplyAdd() {
+        return supplyAdd;
+    }
+
+    @Nullable
+    public NumberProvider getDemandMultiplier() {
+        return demandMultiplier;
+    }
+
+    @Nullable
+    public NumberProvider getSupplyMultiplier() {
+        return supplyMultiplier;
     }
 
     @Override
@@ -97,6 +126,42 @@ public class ShopTraderDemandComponent implements ShopTraderComponent {
         }
         if(buying == null && selling == null) return null;
         return trade.withTrades(buying, selling);
+    }
+
+    protected int nextDemand = -1;
+    @Override
+    public void tick(int tick, int delay, @NotNull ShopTrader trader) {
+        if(demandTick == null) return;
+
+        if(nextDemand == -1){
+            nextDemand = tick + demandTick.value().intValue();
+            return;
+        }
+        if(tick < nextDemand){
+            return;
+        }
+        nextDemand = tick + demandTick.value().intValue();
+
+        trader.getProfession().getAllTrades().forEach(trade ->{
+            var data = trade.get(CruxShopsComponents.TRADER_TRADE_DEMAND);
+            if(data==null) return;
+            if(demandAdd != null){
+                data.addDemand(demandAdd.value().intValue());
+            }
+            if(supplyAdd != null){
+                data.addSupply(supplyAdd.value().intValue());
+            }
+            if(demandMultiplier != null){
+                data.setDemand(
+                    (int) (data.getDemand() * demandMultiplier.value().floatValue())
+                );
+            }
+            if(supplyMultiplier != null){
+                data.setSupply(
+                    (int) (data.getSupply() * supplyMultiplier.value().floatValue())
+                );
+            }
+        });
     }
 
     public static class TradeModifier{
