@@ -25,9 +25,13 @@ public class PluginItemTradeResult extends PluginItemTradeObject implements Shop
     public void give(@NotNull Entity e) {
         if(!(e instanceof HumanEntity p)) return;
         ItemStack i = item();
-        CruxEntityUtil.giveOrDrop(p, drop ->{
-            drop.setOwner(e.getUniqueId());
-        }, i);
+        int amount = this.amount;
+        while(amount > 0){
+            amount--;
+            CruxEntityUtil.giveOrDrop(p, drop ->{
+                drop.setOwner(e.getUniqueId());
+            }, i.clone());
+        }
     }
 
     @Override
