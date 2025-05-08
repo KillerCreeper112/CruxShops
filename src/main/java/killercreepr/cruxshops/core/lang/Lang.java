@@ -42,8 +42,16 @@ public class Lang {
             .build()
     );
 
-    public static final Msg TRADE_PURCHASED = create("trade_purchased",
+    public static final Msg TRADE_PURCHASE_BUYING = create(
         Communicator.builder()
+            .chat("<yellow><shop_trade_result_amount:0>x <shop_trade_result_name:0> sold for <shop_trade_ingredient_amount:0>x <shop_trade_ingredient_name:0>")
+            .sound(CreateSound.sound(Sound.BLOCK_NOTE_BLOCK_PLING, 2f))
+            .build()
+    );
+
+    public static final Msg TRADE_PURCHASE_SELLING = create(
+        Communicator.builder()
+            .chat("<yellow><shop_trade_ingredient_amount:0>x <shop_trade_ingredient_name:0> sold for <shop_trade_result_amount:0>x <shop_trade_result_name:0>")
             .sound(CreateSound.sound(Sound.BLOCK_NOTE_BLOCK_PLING, 2f))
             .build()
     );

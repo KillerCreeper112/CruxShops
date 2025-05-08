@@ -24,6 +24,7 @@ import killercreepr.cruxshops.api.shop.trade.TraderTrade;
 import killercreepr.cruxshops.api.trader.ShopTrader;
 import killercreepr.cruxshops.core.CruxShopsPlugin;
 import killercreepr.cruxshops.core.config.Config;
+import killercreepr.cruxshops.core.lang.Lang;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -371,8 +372,15 @@ public class ShopTraderMenu extends ConfigMenu {
                 clearMenuItems(true);
                 load();
                 open(p);
+
+                var tags = TagContainer.merged().hook(traderTrade).hook(t);
+
+                if(t.equals(traderTrade.getBuyingTrade())){
+                    Lang.TRADE_PURCHASE_BUYING.use(p, tags);
+                }else if(t.equals(traderTrade.getSellingTrade())){
+                    Lang.TRADE_PURCHASE_SELLING.use(p, tags);
+                }
             }
-            p.sendMessage("purchase");
         };
     }
 

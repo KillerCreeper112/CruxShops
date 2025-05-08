@@ -297,7 +297,7 @@ public class ShopTraderMenuOLD extends ConfigMenu {
                 load();
                 open(p);
             }
-            p.sendMessage("purchase");
+            //p.sendMessage("purchase");
         };
     }
 
