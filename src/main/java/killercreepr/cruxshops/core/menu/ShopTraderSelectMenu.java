@@ -26,6 +26,7 @@ import killercreepr.cruxshops.core.lang.Lang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
@@ -97,9 +98,10 @@ public class ShopTraderSelectMenu extends ConfigMenu {
 
                 var tags = TagContainer.merged().hook(trade).hook(t);
 
-                if(t.equals(trade.getBuyingTrade())){
+                var original = OriginalHolder.getCompleteOriginalOrThis(t);
+                if(original.equals(trade.getBuyingTrade())){
                     Lang.TRADE_PURCHASE_BUYING.use(p, tags);
-                }else if(t.equals(trade.getSellingTrade())){
+                }else if(original.equals(trade.getSellingTrade())){
                     Lang.TRADE_PURCHASE_SELLING.use(p, tags);
                 }
             }
