@@ -98,10 +98,9 @@ public class ShopTraderSelectMenu extends ConfigMenu {
 
                 var tags = TagContainer.merged().hook(trade).hook(t);
 
-                var original = OriginalHolder.getCompleteOriginalOrThis(t);
-                if(original.equals(trade.getBuyingTrade())){
+                if(t.equals(trade.getBuyingTrade())){
                     Lang.TRADE_PURCHASE_BUYING.use(p, tags);
-                }else if(original.equals(trade.getSellingTrade())){
+                }else if(t.equals(trade.getSellingTrade())){
                     Lang.TRADE_PURCHASE_SELLING.use(p, tags);
                 }
             }
