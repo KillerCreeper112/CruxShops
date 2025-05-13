@@ -11,6 +11,11 @@ import killercreepr.crux.api.text.tags.container.MergedTagContainer;
 import killercreepr.crux.core.Crux;
 import killercreepr.crux.core.plugin.CruxPlugin;
 import killercreepr.crux.paper.ItemHolder;
+import killercreepr.cruxadvancements.api.advancement.objective.AdvancementObjective;
+import killercreepr.cruxadvancements.core.advancement.objective.ObjectiveCommonData;
+import killercreepr.cruxadvancements.core.config.CruxAdvanceCfgData;
+import killercreepr.cruxadvancements.core.config.handler.FileAdvancementObjective;
+import killercreepr.cruxadvancements.core.config.handler.FileSimpleAdvanceObjective;
 import killercreepr.cruxconfig.config.bukkit.file.CruxFolder;
 import killercreepr.cruxconfig.config.common.FileContext;
 import killercreepr.cruxconfig.config.common.FileRegistry;
@@ -30,6 +35,8 @@ import killercreepr.cruxshops.api.shop.trade.ShopTradeIngredient;
 import killercreepr.cruxshops.api.shop.trade.ShopTradeResult;
 import killercreepr.cruxshops.api.shop.trade.TraderTrade;
 import killercreepr.cruxshops.api.trader.ShopTrader;
+import killercreepr.cruxshops.core.CruxShopsPlugin;
+import killercreepr.cruxshops.core.advancement.objective.UseShopTradeObjective;
 import killercreepr.cruxshops.core.config.handler.*;
 import killercreepr.cruxshops.core.config.loader.CfgShopTraderLoader;
 import killercreepr.cruxshops.core.menu.ShopTraderMenu;
@@ -57,6 +64,8 @@ public class CfgHook {
     public static final FileShopTrader SHOP_TRADER = new FileShopTrader();
     public static final FileTraderTrade TRADER_TRADE = new FileTraderTrade();
     public static final FileTraderProfession TRADER_PROFESSION = new FileTraderProfession();
+
+    private static final FileAdvancementObjective fileAdvancementObjective = CruxAdvanceCfgData.fileAdvancementObjective();
 
     public static void load(){
         registerShopTradeTypes();
@@ -110,6 +119,16 @@ public class CfgHook {
                     return current;
                 }
             });
+        });
+
+        fileAdvancementObjective.registerCustomHandler(new FileSimpleAdvanceObjective<>(CruxShopsPlugin.inst().key("use_trade")) {
+
+            @Override
+            public @Nullable AdvancementObjective deserializeFromFile(@NotNull FileContext<?> ctx, @NotNull FileObject e, @NotNull ObjectiveCommonData data) {
+                Integer maxProgress = e.getObject(Integer.class, "amount");
+                if (maxProgress == null) maxProgress = 1;
+                return new UseShopTradeObjective(data, maxProgress);
+            }
         });
     }
 
