@@ -27,10 +27,22 @@ public class TraderTradeDemandComponent implements TraderTradeComponent, Keyed {
     public static TraderTradeDemandComponent load(@NotNull FileContext<?> ctx, @NotNull ShopTrader trader, FileElement element){
         if(!(element instanceof FileObject o)) return null;
         Key key = ctx.getRegistry().deserializeFromFile(Key.class, o.get("key"));
-        if(key == null) return null;
         Integer demand = o.getObject(Integer.class, "demand");
         Integer supply = o.getObject(Integer.class, "supply");
         if(demand == null || supply == null) return null;
+
+        Integer cacheDemand = o.getObject(Integer.class, "cache_demand");
+        Integer cacheSupply = o.getObject(Integer.class, "cache_supply");
+
+        if(cacheDemand != null && cacheSupply != null){
+            CacheTraderTradeDemandComponent data = new CacheTraderTradeDemandComponent(key);
+            data.setSupply(supply);
+            data.setDemand(demand);
+            data.setCacheSupply(cacheSupply);
+            data.setCacheDemand(cacheDemand);
+            return data;
+        }
+
         TraderTradeDemandComponent data = new TraderTradeDemandComponent(key);
         data.setSupply(supply);
         data.setDemand(demand);
@@ -43,8 +55,7 @@ public class TraderTradeDemandComponent implements TraderTradeComponent, Keyed {
         return new FileObject()
             .add("key", ctx.getRegistry().serializeToFile(key))
             .addProperty("demand", demand)
-            .addProperty("supply", supply)
-            ;
+            .addProperty("supply", supply);
     }
 
     public ShopTrade adjustTrade(TraderTrade traderTrade, ShopTrade trade, ShopTraderDemandComponent.TradeModifier modifier){
@@ -94,9 +105,9 @@ public class TraderTradeDemandComponent implements TraderTradeComponent, Keyed {
         double modifier;
 
         if (type == TradeType.BUY) {
-            modifier = getBuyModifier(demand, supply, mod.getModifier(), 0.01, 5);
+            modifier = getBuyModifier(demand, supply, mod.getBuyModifier(), 0.01, 5);
         } else {
-            modifier = getSellModifier(demand, supply, mod.getModifier(), 0.01, 5);
+            modifier = getSellModifier(demand, supply, mod.getSellModifier(), 0.01, 5);
         }
 
         int adjustedAmount = (int) Math.round(baseAmount * modifier);

@@ -62,18 +62,25 @@ public class ShopTraderDemandComponent implements ShopTraderComponent {
 
     @Override
     public void load(@NotNull FileContext<?> ctx, @NotNull FileObject object, @NotNull ShopTrader trader){
-        if(!(object.get("trader_demand") instanceof FileArray a)) return;
-        a.forEach(ele ->{
-            var loaded = TraderTradeDemandComponent.load(ctx, trader, ele);
-            if(loaded == null) return;
-            trader.getProfession().getAllTrades().forEach(traderTrade ->{
-                var data = traderTrade.get(CruxShopsComponents.TRADER_TRADE_DEMAND);
-                if(data==null) return;
-                if(!data.key().equals(loaded.key())) return;
-                data.setDemand(loaded.getDemand());
-                data.setSupply(loaded.getSupply());
+
+        if((object.get("trader_demand") instanceof FileArray a)){
+            a.forEach(ele ->{
+                var loaded = TraderTradeDemandComponent.load(ctx, trader, ele);
+                if(loaded == null) return;
+                trader.getProfession().getAllTrades().forEach(traderTrade ->{
+                    var data = traderTrade.get(CruxShopsComponents.TRADER_TRADE_DEMAND);
+                    if(data==null) return;
+                    if(!data.key().equals(loaded.key())) return;
+                    data.setDemand(loaded.getDemand());
+                    data.setSupply(loaded.getSupply());
+
+                    if(loaded instanceof CacheTraderTradeDemandComponent loadC && data instanceof CacheTraderTradeDemandComponent c){
+                        c.setCacheDemand(loadC.getCacheDemand());
+                        c.setCacheSupply(loadC.getCacheSupply());
+                    }
+                });
             });
-        });
+        }
     }
 
     @Override
@@ -81,10 +88,10 @@ public class ShopTraderDemandComponent implements ShopTraderComponent {
         FileArray a = new FileArray(trader.getProfession().getAllTrades().size());
         trader.getProfession().getAllTrades().forEach(trade ->{
             var data = trade.get(CruxShopsComponents.TRADER_TRADE_DEMAND);
-            if(data==null) return;
-            var saved = data.save(ctx, trader, trade);
-            if(saved==null) return;
-            a.add(saved);
+            if(data!=null){
+                var saved = data.save(ctx, trader, trade);
+                if(saved!=null) a.add(saved);
+            }
         });
         object.add("trader_demand", a);
     }
@@ -95,9 +102,11 @@ public class ShopTraderDemandComponent implements ShopTraderComponent {
         var data = original.get(CruxShopsComponents.TRADER_TRADE_DEMAND);
         if(data == null) return;
         if(trade.equals(traderTrade.getBuyingTrade())){
-            data.addDemand(1);
+            if(data instanceof CacheTraderTradeDemandComponent c) c.addCacheDemand(1);
+            else data.addDemand(1);
         }else if(trade.equals(traderTrade.getSellingTrade())){
-            data.addSupply(1);
+            if(data instanceof CacheTraderTradeDemandComponent c) c.addCacheSupply(1);
+            else data.addSupply(1);
         }else throw new UnsupportedOperationException("What the heck??");
     }
 
@@ -146,31 +155,49 @@ public class ShopTraderDemandComponent implements ShopTraderComponent {
             var data = trade.get(CruxShopsComponents.TRADER_TRADE_DEMAND);
             if(data==null) return;
             if(demandMultiplier != null){
-                data.setDemand(
-                    (int) (data.getDemand() * demandMultiplier.value().floatValue())
-                );
+                if(data instanceof CacheTraderTradeDemandComponent c){
+                    c.setCacheDemand(
+                        (int) (c.getCacheDemand() * demandMultiplier.value().floatValue())
+                    );
+                }else{
+                    data.setDemand(
+                        (int) (data.getDemand() * demandMultiplier.value().floatValue())
+                    );
+                }
             }
             if(supplyMultiplier != null){
-                data.setSupply(
-                    (int) (data.getSupply() * supplyMultiplier.value().floatValue())
-                );
+                if(data instanceof CacheTraderTradeDemandComponent c){
+                    c.setCacheSupply(
+                        (int) (c.getCacheSupply() * supplyMultiplier.value().floatValue())
+                    );
+                }else{
+                    data.setSupply(
+                        (int) (data.getSupply() * supplyMultiplier.value().floatValue())
+                    );
+                }
             }
             if(demandAdd != null){
-                data.addDemand(demandAdd.value().intValue());
+                if(data instanceof CacheTraderTradeDemandComponent c){
+                    c.addCacheDemand(demandAdd.value().intValue());
+                } else data.addDemand(demandAdd.value().intValue());
             }
             if(supplyAdd != null){
-                data.addSupply(supplyAdd.value().intValue());
+                if(data instanceof CacheTraderTradeDemandComponent c){
+                    c.addCacheSupply(supplyAdd.value().intValue());
+                }else data.addSupply(supplyAdd.value().intValue());
             }
         });
     }
 
     public static class TradeModifier{
-        protected final double modifier;
+        protected final double buyModifier;
+        protected final double sellModifier;
         protected final @Nullable Integer priceClampMin;
         protected final @Nullable Integer priceClampMax;
 
-        public TradeModifier(double modifier, @Nullable Integer priceClampMin, @Nullable Integer priceClampMax) {
-            this.modifier = modifier;
+        public TradeModifier(double buyModifier, double sellModifier, @Nullable Integer priceClampMin, @Nullable Integer priceClampMax) {
+            this.buyModifier = buyModifier;
+            this.sellModifier = sellModifier;
             this.priceClampMin = priceClampMin;
             this.priceClampMax = priceClampMax;
         }
@@ -179,8 +206,12 @@ public class ShopTraderDemandComponent implements ShopTraderComponent {
             return object instanceof CruxCurrencyTradeObject;
         }
 
-        public double getModifier() {
-            return modifier;
+        public double getBuyModifier() {
+            return buyModifier;
+        }
+
+        public double getSellModifier() {
+            return sellModifier;
         }
 
         public int clampPrice(int price, int originalPrice){

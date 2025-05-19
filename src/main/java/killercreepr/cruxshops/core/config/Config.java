@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 
 public class Config extends Cfg {
+    public final CfgValue<Boolean> USURVIVE_SPAWN_LOGIC = new CommonValue<>(true){};
     public final CfgValue<DynamicItem> SELLING_ITEM = new CommonValue<>(){};
     public final CfgValue<DynamicItem> BUYING_ITEM = new CommonValue<>(){};
 

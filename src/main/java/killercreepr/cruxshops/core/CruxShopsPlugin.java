@@ -19,15 +19,20 @@ import killercreepr.cruxconfig.config.common.file.DataFile;
 import killercreepr.cruxcore.CruxCore;
 import killercreepr.cruxshops.api.market.Market;
 import killercreepr.cruxshops.core.command.CruxShopCommands;
+import killercreepr.cruxshops.core.component.CacheTraderTradeDemandComponent;
 import killercreepr.cruxshops.core.component.CruxShopsComponents;
 import killercreepr.cruxshops.core.config.CfgHook;
 import killercreepr.cruxshops.core.config.Config;
 import killercreepr.cruxshops.core.lang.Lang;
 import killercreepr.cruxshops.core.market.SimpleMarket;
+import killercreepr.cruxshops.core.menu.ShopTraderMenu;
 import killercreepr.cruxshops.core.registries.ShopsRegistries;
 import killercreepr.cruxshops.core.text.tags.object.ShopTradeTags;
 import killercreepr.cruxshops.core.text.tags.object.TraderTradeTags;
+import org.bukkit.GameRule;
+import org.bukkit.World;
 import org.bukkit.event.Listener;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -99,6 +104,31 @@ public class CruxShopsPlugin extends CruxPlugin implements Listener, LangProvide
         }
 
         super.enabled();
+
+        if(!values.USURVIVE_SPAWN_LOGIC.valueOr(false)) return;
+        new BukkitRunnable(){
+            World world;
+            @Override
+            public void run() {
+                if(world == null){
+                    world = getServer().getWorld("world_spawn");
+                    if(world == null) return;
+                }
+
+                if(Boolean.TRUE.equals(world.getGameRuleValue(GameRule.DO_DAYLIGHT_CYCLE)) && world.getTime() == 0){
+                    getLogger().info("Updating cache in CruxShops");
+                    for(var trader : ShopsRegistries.SHOP_TRADER){
+                        trader.getProfession().getAllTrades().forEach(trade ->{
+                            var data = trade.get(CruxShopsComponents.TRADER_TRADE_DEMAND);
+                            if(!(data instanceof CacheTraderTradeDemandComponent c)) return;
+                            data.setSupply(c.getCacheSupply());
+                            data.setDemand(c.getCacheDemand());
+                        });
+                    }
+                    ShopTraderMenu.updateMenus();
+                }
+            }
+        }.runTaskTimer(this, 10L, 1L);
     }
 
     @Override

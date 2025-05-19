@@ -16,7 +16,11 @@ public class CruxShopsComponents {
     public static final DataComponentType<TraderTradeDemandComponent> TRADER_TRADE_DEMAND = register("trader_trade/demand", builder ->
         builder.textParser(PersistTextParser.mapBuilder(TraderTradeDemandComponent.class)
                 .field("key", TextInputField.field(PersistTextParser.KEY, TraderTradeDemandComponent::key))
-            .apply(ctx -> new TraderTradeDemandComponent(ctx.get("key")))));
+            .apply(ctx ->{
+                boolean cache = ctx.getOptional("cache", true);
+                if(cache) return new CacheTraderTradeDemandComponent(ctx.get("key"));
+                return new TraderTradeDemandComponent(ctx.get("key"));
+            })));
 
     private static <T> DataComponentType<T> register(String id, UnaryOperator<DataComponentType.Builder<T>> builderOperator){
         return CruxRegistries.DATA_COMPONENT_TYPE.register(Crux.key(id), builderOperator.apply(DataComponentType.builder()).build());

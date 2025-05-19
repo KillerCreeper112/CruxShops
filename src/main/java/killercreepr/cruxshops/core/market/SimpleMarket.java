@@ -136,8 +136,8 @@ public class SimpleMarket extends SimpleStatutable implements Market, Loadable {
         for(ShopTrader merchant : merchants){
             if(!(merchant instanceof TickedTime time)) continue;
             time.tick(tick, TICK_DELAY);
-            ShopTraderMenu.updateMenus();
         }
+        ShopTraderMenu.updateMenus();
     }
 
     @NotNull
