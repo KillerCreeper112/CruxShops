@@ -99,7 +99,7 @@ public class ShopTraderMenuOLD extends ConfigMenu {
                 clearMenuItems(true);
                 load();
                 open(p);
-                CreateSound.sound(Sound.UI_BUTTON_CLICK).playFor(p);
+                CreateSound.sound(Sound.UI_BUTTON_CLICK, 0.2f, 1f).playFor(p);
             }
             @Override
             public @Nullable ItemStack getSlottedItemReplacement() {
@@ -132,7 +132,7 @@ public class ShopTraderMenuOLD extends ConfigMenu {
                 clearMenuItems(true);
                 load();
                 open(p);
-                CreateSound.sound(Sound.UI_BUTTON_CLICK).playFor(p);
+                CreateSound.sound(Sound.UI_BUTTON_CLICK, 0.2f, 1f).playFor(p);
             }
 
             @Override

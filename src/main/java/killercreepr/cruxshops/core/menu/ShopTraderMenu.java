@@ -122,7 +122,7 @@ public class ShopTraderMenu extends ConfigMenu {
                 clearMenuItems(true);
                 load();
                 open(p);
-                CreateSound.sound(Sound.UI_BUTTON_CLICK).playFor(p);
+                CreateSound.sound(Sound.UI_BUTTON_CLICK, 0.2f, 1f).playFor(p);
             }
             @Override
             public @Nullable ItemStack getSlottedItemReplacement() {
@@ -159,7 +159,7 @@ public class ShopTraderMenu extends ConfigMenu {
                 page = newPage;
                 reload();
                 open(p);
-                CreateSound.sound(Sound.UI_BUTTON_CLICK).playFor(p);
+                CreateSound.sound(Sound.UI_BUTTON_CLICK, 0.2f, 1f).playFor(p);
             }
 
             @Override
@@ -343,7 +343,7 @@ public class ShopTraderMenu extends ConfigMenu {
                     .put("trader", trader)
                     .build()
             );
-            CreateSound.sound(Sound.UI_BUTTON_CLICK).playFor(p);
+            CreateSound.sound(Sound.UI_BUTTON_CLICK, 0.2f, 1f).playFor(p);
         };
     }
 
