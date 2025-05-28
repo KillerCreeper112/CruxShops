@@ -7,6 +7,7 @@ import killercreepr.crux.core.component.parser.type.ComponentInputParsers;
 public class CruxShopCompParsers {
     public static final PersistTextParser<ShopTraderDemandComponent.TradeModifier> DEMAND_TRADE_MODIFIER =
         PersistTextParser.mapBuilder(ShopTraderDemandComponent.TradeModifier.class)
+            .field("modifier", TextInputField.field(PersistTextParser.DOUBLE, (e) -> null))
             .field("buy_modifier", TextInputField.field(PersistTextParser.DOUBLE, ShopTraderDemandComponent.TradeModifier::getBuyModifier))
             .field("sell_modifier", TextInputField.field(PersistTextParser.DOUBLE, ShopTraderDemandComponent.TradeModifier::getSellModifier))
             .field("price_clamp_min", TextInputField.field(PersistTextParser.INTEGER, ShopTraderDemandComponent.TradeModifier::getPriceClampMin))

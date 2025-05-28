@@ -12,9 +12,13 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import killercreepr.crux.api.data.DataExchange;
 import killercreepr.crux.core.Crux;
 import killercreepr.cruxcore.CruxCore;
+import killercreepr.cruxshops.api.component.ShopTraderComponent;
 import killercreepr.cruxshops.api.trader.ShopTrader;
 import killercreepr.cruxshops.core.CruxShopsPlugin;
 import killercreepr.cruxshops.core.command.argument.ShopArguments;
+import killercreepr.cruxshops.core.component.CacheTraderTradeDemandComponent;
+import killercreepr.cruxshops.core.component.CruxShopsComponents;
+import killercreepr.cruxshops.core.component.ShopTraderDemandComponent;
 import killercreepr.cruxshops.core.market.SimpleMarket;
 import net.kyori.adventure.key.Key;
 import org.bukkit.command.CommandSender;
@@ -97,6 +101,28 @@ public class CruxShopCommands {
                             return 1;
                         })
                 )
+        ).then(
+            Commands.literal("cleardata")
+                .executes(ctx ->{
+                    var sender = getExecutor(ctx.getSource());
+                    var market = plugin.getGlobalMarket();
+                    if(!(market instanceof SimpleMarket m)) return -1;
+                    m.getMerchants().forEach(trader ->{
+                        trader.getProfession().getAllTrades().forEach(trade ->{
+                            var data = trade.get(CruxShopsComponents.TRADER_TRADE_DEMAND);
+                            if(data != null){
+                                data.setDemand(0);
+                                data.setSupply(0);
+                                if(data instanceof CacheTraderTradeDemandComponent c){
+                                    c.setCacheSupply(0);
+                                    c.setCacheDemand(0);
+                                }
+                            }
+                        });
+                    });
+                    sender.sendMessage("Cleared shop data");
+                    return 1;
+                })
         )
         ;
         return dispatcher.build();

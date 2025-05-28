@@ -9,6 +9,7 @@ import killercreepr.cruxshops.api.shop.trade.*;
 import killercreepr.cruxshops.api.trader.ShopTrader;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -109,6 +110,8 @@ public class TraderTradeDemandComponent implements TraderTradeComponent, Keyed {
         } else {
             modifier = getSellModifier(demand, supply, mod.getSellModifier(), 0.01, 5);
         }
+
+        Bukkit.broadcastMessage("modifier=" + modifier + ", demand=" + demand + ", supply=" + supply + ", sellMod=" + mod.getSellModifier());
 
         int adjustedAmount = (int) Math.round(baseAmount * modifier);
         adjustedAmount = mod.clampPrice(adjustedAmount, OriginalHolder.getCompleteOriginalOrThis(result).getAmount());
