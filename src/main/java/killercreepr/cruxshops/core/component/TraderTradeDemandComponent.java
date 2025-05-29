@@ -111,8 +111,6 @@ public class TraderTradeDemandComponent implements TraderTradeComponent, Keyed {
             modifier = getSellModifier(demand, supply, mod.getSellModifier(), 0.01, 5);
         }
 
-        Bukkit.broadcastMessage("modifier=" + modifier + ", demand=" + demand + ", supply=" + supply + ", sellMod=" + mod.getSellModifier());
-
         int adjustedAmount = (int) Math.round(baseAmount * modifier);
         adjustedAmount = mod.clampPrice(adjustedAmount, OriginalHolder.getCompleteOriginalOrThis(result).getAmount());
 
