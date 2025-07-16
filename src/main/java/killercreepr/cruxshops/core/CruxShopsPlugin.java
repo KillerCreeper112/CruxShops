@@ -29,6 +29,7 @@ import killercreepr.cruxshops.core.market.SimpleMarket;
 import killercreepr.cruxshops.core.menu.ShopTraderMenu;
 import killercreepr.cruxshops.core.registries.ShopsRegistries;
 import killercreepr.cruxshops.core.text.tags.object.ShopTradeTags;
+import killercreepr.cruxshops.core.text.tags.object.ShopTraderTags;
 import killercreepr.cruxshops.core.text.tags.object.TraderTradeTags;
 import org.bukkit.GameRule;
 import org.bukkit.World;
@@ -79,7 +80,8 @@ public class CruxShopsPlugin extends CruxPlugin implements Listener, LangProvide
 
         Crux.tags().register(
             new ShopTradeTags(),
-            new TraderTradeTags()
+            new TraderTradeTags(),
+            new ShopTraderTags()
         );
 
         new CruxShopCommands(this).register();
