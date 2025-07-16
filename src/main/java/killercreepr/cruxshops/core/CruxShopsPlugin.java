@@ -24,6 +24,7 @@ import killercreepr.cruxshops.core.component.CruxShopsComponents;
 import killercreepr.cruxshops.core.config.CfgHook;
 import killercreepr.cruxshops.core.config.Config;
 import killercreepr.cruxshops.core.lang.Lang;
+import killercreepr.cruxshops.core.listener.CustomObjectiveListener;
 import killercreepr.cruxshops.core.market.SimpleMarket;
 import killercreepr.cruxshops.core.menu.ShopTraderMenu;
 import killercreepr.cruxshops.core.registries.ShopsRegistries;
@@ -93,7 +94,8 @@ public class CruxShopsPlugin extends CruxPlugin implements Listener, LangProvide
         }
 
         registerListeners(
-            this
+            this,
+            new CustomObjectiveListener()
         );
 
         if(CruxRegistries.MODULES.containsKey(StandardModules.CRUX_CONFIGS)){
