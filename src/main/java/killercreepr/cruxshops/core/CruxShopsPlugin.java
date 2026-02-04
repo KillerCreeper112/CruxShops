@@ -31,6 +31,7 @@ import killercreepr.cruxshops.core.registries.ShopsRegistries;
 import killercreepr.cruxshops.core.text.tags.object.ShopTradeTags;
 import killercreepr.cruxshops.core.text.tags.object.ShopTraderTags;
 import killercreepr.cruxshops.core.text.tags.object.TraderTradeTags;
+import killercreepr.cruxshops.external.cruxquest.CruxQuestHook;
 import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.event.Listener;
@@ -85,6 +86,10 @@ public class CruxShopsPlugin extends CruxPlugin implements Listener, LangProvide
         );
 
         new CruxShopCommands(this).register();
+
+        if(getServer().getPluginManager().getPlugin("CruxQuest") != null){
+            CruxQuestHook.onLoad();
+        }
     }
 
     @Override
@@ -108,6 +113,9 @@ public class CruxShopsPlugin extends CruxPlugin implements Listener, LangProvide
         }
 
         super.enabled();
+        if(getServer().getPluginManager().getPlugin("CruxQuest") != null){
+            CruxQuestHook.onEnable(this);
+        }
 
         if(!values.USURVIVE_SPAWN_LOGIC.valueOr(false)) return;
         new BukkitRunnable(){

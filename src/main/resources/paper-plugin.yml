@@ -19,3 +19,5 @@ dependencies:
       required: false
     CruxRewards:
       required: false
+    CruxQuest:
+      required: false

@@ -17,7 +17,8 @@ dependencies {
         "E:\\Plugins\\YO\\CruxCore\\build\\libs\\CruxCore-1.0-all.jar",
         "E:\\Plugins\\YO\\CruxCurrency\\build\\libs\\CruxCurrency-1.0.jar",
         "E:\\Plugins\\YO\\CruxSummoning\\build\\libs\\CruxSummoning-1.0.jar",
-        "E:\\Plugins\\YO\\CruxRewards\\build\\libs\\CruxRewards-1.0.jar"
+        "E:\\Plugins\\YO\\CruxRewards\\build\\libs\\CruxRewards-1.0.jar",
+      "E:\\Plugins\\YO\\CruxQuest\\build\\libs\\CruxQuest-1.0-all.jar"
     ))
 
     compileOnly(fileTree("libs"){
