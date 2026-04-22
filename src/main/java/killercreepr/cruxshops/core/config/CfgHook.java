@@ -25,6 +25,7 @@ import killercreepr.cruxconfig.config.common.element.FileObject;
 import killercreepr.cruxconfig.config.common.handler.FileObjectHandler;
 import killercreepr.cruxconfig.config.registry.CfgRegistries;
 import killercreepr.cruxcurrency.core.registry.CruxCurrencyRegistries;
+import killercreepr.cruxmenus.api.menu.CfgMenu;
 import killercreepr.cruxmenus.api.menu.holder.MenuHolder;
 import killercreepr.cruxmenus.core.menu.ConfigMenu;
 import killercreepr.cruxmenus.core.menu.holder.SimpleMenuHolder;
@@ -105,12 +106,23 @@ public class CfgHook {
                                 public @NotNull ConfigMenu createMenu(@NotNull DataExchange data, @Nullable MergedTagContainer tags) {
                                     return new ShopTraderMenu(this, data);
                                 }
+
+                                @NotNull
+                                @Override
+                                public CfgMenu createMenu(@NotNull DataExchange data) {
+                                    return new ShopTraderMenu(this, data);
+                                }
                             };
                         }
                         case "simple_select" ->{
                             return new SimpleMenuHolder(current.key(), current.getTitle(), current.getSize(), current.getItems(), current.info(), current.getModules()){
                                 @Override
                                 public @NotNull ConfigMenu createMenu(@NotNull DataExchange data, @Nullable MergedTagContainer tags) {
+                                    return new ShopTraderSelectMenu(this, data);
+                                }
+
+                                @Override
+                                public @NotNull CfgMenu createMenu(@NotNull DataExchange data) {
                                     return new ShopTraderSelectMenu(this, data);
                                 }
                             };
