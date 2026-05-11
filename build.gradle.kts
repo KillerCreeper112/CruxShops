@@ -20,18 +20,23 @@ dependencies {
         "E:\\Plugins\\YO\\CruxRewards\\build\\libs\\CruxRewards-1.0.jar",
       "E:\\Plugins\\YO\\CruxQuest\\build\\libs\\CruxQuest-1.0-all.jar"
     ))
+    implementation("com.zaxxer:HikariCP:7.0.2")
 
     compileOnly(fileTree("libs"){
         include("*.jar")
     })
 }
 
-paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
-
 tasks{
     assemble{
         //dependsOn(reobfJar)
         dependsOn(shadowJar)
+    }
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(25))
     }
 }
 

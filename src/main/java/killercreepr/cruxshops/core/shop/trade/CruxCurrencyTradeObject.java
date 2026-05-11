@@ -22,6 +22,10 @@ public abstract class CruxCurrencyTradeObject implements ShopTradeObject {
         this.original = original;
     }
 
+    public Holder<CruxCurrency> getCurrencyHolder() {
+        return currencyHolder;
+    }
+
     @Nullable
     @Override
     public ShopTradeObject getOriginal() {

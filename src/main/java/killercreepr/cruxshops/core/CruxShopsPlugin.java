@@ -17,14 +17,17 @@ import killercreepr.cruxconfig.config.bukkit.file.CruxFolder;
 import killercreepr.cruxconfig.config.bukkit.standard.SimpleLangConfig;
 import killercreepr.cruxconfig.config.common.file.DataFile;
 import killercreepr.cruxcore.CruxCore;
+import killercreepr.cruxshops.api.database.ShopDatabase;
 import killercreepr.cruxshops.api.market.Market;
 import killercreepr.cruxshops.core.command.CruxShopCommands;
 import killercreepr.cruxshops.core.component.CacheTraderTradeDemandComponent;
 import killercreepr.cruxshops.core.component.CruxShopsComponents;
 import killercreepr.cruxshops.core.config.CfgHook;
 import killercreepr.cruxshops.core.config.Config;
+import killercreepr.cruxshops.core.database.SQLDatabase;
 import killercreepr.cruxshops.core.lang.Lang;
 import killercreepr.cruxshops.core.listener.CustomObjectiveListener;
+import killercreepr.cruxshops.core.listener.DatabaseListener;
 import killercreepr.cruxshops.core.market.SimpleMarket;
 import killercreepr.cruxshops.core.menu.ShopTraderMenu;
 import killercreepr.cruxshops.core.registries.ShopsRegistries;
@@ -33,6 +36,7 @@ import killercreepr.cruxshops.core.text.tags.object.ShopTraderTags;
 import killercreepr.cruxshops.core.text.tags.object.TraderTradeTags;
 import killercreepr.cruxshops.external.cruxquest.CruxQuestHook;
 import org.bukkit.GameRule;
+import org.bukkit.GameRules;
 import org.bukkit.World;
 import org.bukkit.event.Listener;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -70,6 +74,16 @@ public class CruxShopsPlugin extends CruxPlugin implements Listener, LangProvide
 
     public void setGlobalMarket(Market globalMarket) {
         this.globalMarket = globalMarket;
+    }
+
+    protected ShopDatabase shopDatabase;
+
+    public ShopDatabase getShopDatabase() {
+        return shopDatabase;
+    }
+
+    public void setShopDatabase(ShopDatabase shopDatabase) {
+        this.shopDatabase = shopDatabase;
     }
 
     @Override
@@ -117,6 +131,17 @@ public class CruxShopsPlugin extends CruxPlugin implements Listener, LangProvide
             CruxQuestHook.onEnable(this);
         }
 
+        var databaseDetails = values.SHOP_DATABASE_DETAILS.value();
+        if(databaseDetails != null){
+            shopDatabase = new SQLDatabase(
+              this, databaseDetails.url(), databaseDetails.name(),
+              databaseDetails.password()
+            );
+            registerListeners(
+              new DatabaseListener(shopDatabase)
+            );
+        }
+
         if(!values.USURVIVE_SPAWN_LOGIC.valueOr(false)) return;
         new BukkitRunnable(){
             World world;
@@ -127,7 +152,7 @@ public class CruxShopsPlugin extends CruxPlugin implements Listener, LangProvide
                     if(world == null) return;
                 }
 
-                if(Boolean.TRUE.equals(world.getGameRuleValue(GameRule.DO_DAYLIGHT_CYCLE)) && world.getTime() == 0){
+                if(Boolean.TRUE.equals(world.getGameRuleValue(GameRules.ADVANCE_TIME)) && world.getTime() == 0){
                     getLogger().info("Updating cache in CruxShops");
                     for(var trader : ShopsRegistries.SHOP_TRADER){
                         trader.getProfession().getAllTrades().forEach(trade ->{

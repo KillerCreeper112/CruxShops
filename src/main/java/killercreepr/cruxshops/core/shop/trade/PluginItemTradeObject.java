@@ -19,6 +19,10 @@ public abstract class PluginItemTradeObject implements ShopTradeObject {
         this.original = original;
     }
 
+    public ItemHolder getItemHolder() {
+        return itemHolder;
+    }
+
     @Nullable
     @Override
     public ShopTradeObject getOriginal() {

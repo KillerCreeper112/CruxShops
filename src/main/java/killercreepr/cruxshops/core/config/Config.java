@@ -5,6 +5,7 @@ import killercreepr.cruxconfig.config.bukkit.file.Cfg;
 import killercreepr.cruxconfig.config.bukkit.file.CruxConfig;
 import killercreepr.cruxconfig.config.bukkit.value.CfgValue;
 import killercreepr.cruxconfig.config.bukkit.value.CommonValue;
+import killercreepr.cruxshops.core.config.object.DatabaseDetails;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,6 +19,8 @@ public class Config extends Cfg {
     public final CfgValue<DynamicItem> RESULT_BOTH_ITEM = new CommonValue<>(){};
     public final CfgValue<DynamicItem> RESULT_BUYING_ITEM = new CommonValue<>(){};
     public final CfgValue<DynamicItem> RESULT_SELLING_ITEM = new CommonValue<>(){};
+
+    public final CfgValue<DatabaseDetails> SHOP_DATABASE_DETAILS = new  CommonValue<>(){};
 
     public Config(@NotNull Plugin plugin, @NotNull String path) {
         super(plugin, path);

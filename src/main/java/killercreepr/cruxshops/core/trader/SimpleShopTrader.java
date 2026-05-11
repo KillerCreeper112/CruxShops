@@ -96,7 +96,7 @@ public class SimpleShopTrader extends DataComponentHandler.Simple implements Sho
     @Override
     public MergedTagContainer buildTags(ShopTrade trade){
         var tags = TagContainer.merged();
-        forEachAllOfType(ShopTraderComponent.class, data -> tags.addAll(data.buildTags(this, trade)));
+        forEachAllOfTypeDeep(ShopTraderComponent.class, data -> tags.addAll(data.buildTags(this, trade)));
         return tags;
     }
 
@@ -107,7 +107,7 @@ public class SimpleShopTrader extends DataComponentHandler.Simple implements Sho
         trade = event.getTrade();
 
         ShopTrade finalTrade = trade;
-        forEachAllOfType(ShopTraderComponent.class, data ->{
+        forEachAllOfTypeDeep(ShopTraderComponent.class, data ->{
             data.onTradePurchased(this, e, traderTrade, finalTrade);
         });
 

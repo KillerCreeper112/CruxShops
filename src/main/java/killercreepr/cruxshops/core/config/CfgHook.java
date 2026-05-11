@@ -22,6 +22,7 @@ import killercreepr.cruxconfig.config.common.FileRegistry;
 import killercreepr.cruxconfig.config.common.base.parsed.FileParsedObjectHandler;
 import killercreepr.cruxconfig.config.common.element.FileElement;
 import killercreepr.cruxconfig.config.common.element.FileObject;
+import killercreepr.cruxconfig.config.common.handler.AutoFileHandler;
 import killercreepr.cruxconfig.config.common.handler.FileObjectHandler;
 import killercreepr.cruxconfig.config.registry.CfgRegistries;
 import killercreepr.cruxcurrency.core.registry.CruxCurrencyRegistries;
@@ -40,6 +41,7 @@ import killercreepr.cruxshops.core.CruxShopsPlugin;
 import killercreepr.cruxshops.core.advancement.objective.UseShopTradeObjective;
 import killercreepr.cruxshops.core.config.handler.*;
 import killercreepr.cruxshops.core.config.loader.CfgShopTraderLoader;
+import killercreepr.cruxshops.core.config.object.DatabaseDetails;
 import killercreepr.cruxshops.core.menu.ShopTraderMenu;
 import killercreepr.cruxshops.core.menu.ShopTraderSelectMenu;
 import killercreepr.cruxshops.core.profession.SimpleTraderProfession;
@@ -167,6 +169,7 @@ public class CfgHook {
     }
 
     public static void registerHandlers(FileRegistry reg){
+        reg.registerFileHandler(new AutoFileHandler<>(DatabaseDetails.class));
         reg.registerFileHandler(ShopTrade.class, SHOP_TRADE);
         reg.registerFileHandler(ShopTradeIngredient.class, SHOP_TRADE_INGREDIENT);
         reg.registerFileHandler(ShopTradeResult.class, SHOP_TRADE_RESULT);
